@@ -1,0 +1,36 @@
+{
+    "name": "quanta/dependency-injection",
+    "type": "library",
+    "description": "Dependency injection library for php",
+    "keywords": [
+        "psr-11",
+        "container",
+        "dependency-injection",
+        "injection"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/quanta/dependency-injection",
+    "support": {
+        "issues": "https://github.com/quanta/dependency-injection/issues",
+        "source": "https://github.com/quanta/dependency-injection"
+    },
+    "authors": [
+        {
+            "name": "pmall",
+            "email": "pierre.mallinjoud@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "psr/container": "^1.0"
+    },
+    "require-dev": {
+        "kahlan/kahlan": "^4.0",
+        "eloquent/phony-kahlan": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Quanta\\": "src"
+        }
+    }
+}
