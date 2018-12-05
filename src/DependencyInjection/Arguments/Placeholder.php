@@ -11,7 +11,7 @@ final class Placeholder implements ArgumentInterface
      */
     public function hasValue(): bool
     {
-        return true;
+        return false;
     }
 
     /**

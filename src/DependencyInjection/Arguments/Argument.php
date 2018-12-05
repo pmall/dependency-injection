@@ -28,7 +28,7 @@ final class Argument implements ArgumentInterface
      */
     public function hasValue(): bool
     {
-        return false;
+        return true;
     }
 
     /**

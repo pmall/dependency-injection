@@ -27,7 +27,7 @@ describe('VariadicArgument', function () {
 
             $test = $this->argument->hasValue();
 
-            expect($test)->toBeFalsy();
+            expect($test)->toBeTruthy();
 
         });
 

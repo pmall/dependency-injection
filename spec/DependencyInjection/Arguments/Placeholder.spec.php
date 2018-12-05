@@ -27,7 +27,7 @@ describe('Placeholder', function () {
 
             $test = $this->argument->hasValue();
 
-            expect($test)->toBeTruthy();
+            expect($test)->toBeFalsy();
 
         });
 

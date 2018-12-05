@@ -28,7 +28,7 @@ final class VariadicArgument implements ArgumentInterface
      */
     public function hasValue(): bool
     {
-        return false;
+        return true;
     }
 
     /**
