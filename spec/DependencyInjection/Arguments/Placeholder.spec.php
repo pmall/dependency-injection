@@ -21,18 +21,6 @@ describe('Placeholder', function () {
 
     });
 
-    describe('->hasValue()', function () {
-
-        it('should return false', function () {
-
-            $test = $this->argument->hasValue();
-
-            expect($test)->toBeFalsy();
-
-        });
-
-    });
-
     describe('->values()', function () {
 
         it('should return an empty array', function () {

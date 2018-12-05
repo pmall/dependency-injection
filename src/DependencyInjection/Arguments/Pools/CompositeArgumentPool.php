@@ -37,7 +37,7 @@ final class CompositeArgumentPool implements ArgumentPoolInterface
 
         $argument = array_reduce($this->pools, $reducer, new Placeholder);
 
-        if (! $argument->hasValue()) {
+        if (count($argument->values()) == 0) {
             return $parameter->hasDefaultValue()
                 ? new Argument($parameter->defaultValue())
                 : new Placeholder;

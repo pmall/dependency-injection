@@ -4,8 +4,8 @@ namespace Quanta\DependencyInjection\Arguments\Pools;
 
 use Psr\Container\ContainerInterface;
 
+use Quanta\DependencyInjection\Arguments\Argument;
 use Quanta\DependencyInjection\Arguments\Placeholder;
-use Quanta\DependencyInjection\Arguments\ContainerEntry;
 use Quanta\DependencyInjection\Arguments\ArgumentInterface;
 use Quanta\DependencyInjection\Parameters\ParameterInterface;
 
@@ -20,7 +20,7 @@ final class ContainerEntries implements ArgumentPoolInterface
             $class = $parameter->typeHint();
 
             return $container->has($class)
-                ? new ContainerEntry($class)
+                ? new Argument($container->get($class))
                 : new Placeholder;
         }
 

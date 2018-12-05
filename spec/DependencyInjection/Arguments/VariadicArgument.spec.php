@@ -21,18 +21,6 @@ describe('VariadicArgument', function () {
 
     });
 
-    describe('->hasValue()', function () {
-
-        it('should return false', function () {
-
-            $test = $this->argument->hasValue();
-
-            expect($test)->toBeTruthy();
-
-        });
-
-    });
-
     describe('->values()', function () {
 
         it('should return the array of values', function () {

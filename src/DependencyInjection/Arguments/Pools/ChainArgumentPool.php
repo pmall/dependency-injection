@@ -45,7 +45,7 @@ final class ChainArgumentPool
      */
     public function __invoke(ArgumentInterface $argument, ArgumentPoolInterface $pool): ArgumentInterface
     {
-        return ! $argument->hasValue()
+        return count($argument->values()) == 0
             ? $pool->argument($this->container, $this->parameter)
             : $argument;
     }

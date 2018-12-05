@@ -58,13 +58,13 @@ describe('CompositeArgumentPool', function () {
 
         });
 
-        context('when at least one argument pool does not return a placeholder', function () {
+        context('when at least one argument pool returns an argument with values', function () {
 
-            it('should return the first non placeholder argument', function () {
+            it('should return the first argument with values', function () {
 
-                $this->argument1->hasValue->returns(false);
-                $this->argument2->hasValue->returns(true);
-                $this->argument3->hasValue->returns(true);
+                $this->argument1->values->returns([]);
+                $this->argument2->values->returns(['value']);
+                $this->argument3->values->returns(['value']);
 
                 $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
@@ -74,13 +74,13 @@ describe('CompositeArgumentPool', function () {
 
         });
 
-        context('when all argument pools return a placeholder', function () {
+        context('when no argument pool return an argument with values', function () {
 
             beforeEach(function () {
 
-                $this->argument1->hasValue->returns(false);
-                $this->argument2->hasValue->returns(false);
-                $this->argument3->hasValue->returns(false);
+                $this->argument1->values->returns([]);
+                $this->argument2->values->returns([]);
+                $this->argument3->values->returns([]);
 
             });
 
@@ -102,13 +102,13 @@ describe('CompositeArgumentPool', function () {
 
             context('when the given parameter does not have a default value', function () {
 
-                it('should return placeholder', function () {
+                it('should return a placeholder', function () {
 
                     $this->parameter->hasDefaultValue->returns(false);
 
                     $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                    expect($test)->toBeAnInstanceOf(Placeholder::class);
+                    expect($test)->toEqual(new Placeholder);
 
                 });
 

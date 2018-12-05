@@ -6,13 +6,11 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DependencyInjection\Arguments\Argument;
 use Quanta\DependencyInjection\Arguments\Placeholder;
-use Quanta\DependencyInjection\Arguments\ContainerEntry;
 use Quanta\DependencyInjection\Arguments\VariadicArgument;
-use Quanta\DependencyInjection\Arguments\VariadicContainerEntry;
 use Quanta\DependencyInjection\Arguments\ArgumentInterface;
 use Quanta\DependencyInjection\Parameters\ParameterInterface;
 
-final class ClassNameMap implements ArgumentPoolInterface
+final class TypeHintValueMap implements ArgumentPoolInterface
 {
     /**
      * The class name to instance map.
@@ -22,22 +20,13 @@ final class ClassNameMap implements ArgumentPoolInterface
     private $instances;
 
     /**
-     * The class name to container id map.
-     *
-     * @var string[]
-     */
-    private $aliases;
-
-    /**
      * Constructor.
      *
-     * @param object[]  $instances
-     * @param string[]  $aliases
+     * @param object[] $instances
      */
-    public function __construct(array $instances, array $aliases)
+    public function __construct(array $instances)
     {
         $this->instances = $instances;
-        $this->aliases = $aliases;
     }
 
     /**
@@ -47,24 +36,24 @@ final class ClassNameMap implements ArgumentPoolInterface
     {
         if ($parameter->hasClassTypeHint()) {
             $class = $parameter->typeHint();
-            $is_variadic = $parameter->isVariadic();
 
-            if (isset($this->aliases[$class])) {
-                return $is_variadic
-                    ? new VariadicContainerEntry($this->aliases[$class])
-                    : new ContainerEntry($this->aliases[$class]);
-            }
-
-            if (isset($this->instances[$class])) {
+            if (array_key_exists($class, $this->instances)) {
                 $value = $this->instances[$class];
 
-                if (! $is_variadic) {
+                if (! $parameter->isVariadic()) {
                     return new Argument($value);
                 }
 
                 if (is_array($value)) {
                     return new VariadicArgument($value);
                 }
+
+                throw new \LogicException(
+                    vsprintf('Parameter %s is variadic and must therefore be associated with an array of values, %s given', [
+                        $parameter->name(),
+                        gettype($value),
+                    ])
+                );
             }
         }
 

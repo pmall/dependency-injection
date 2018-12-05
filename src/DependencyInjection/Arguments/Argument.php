@@ -2,8 +2,6 @@
 
 namespace Quanta\DependencyInjection\Arguments;
 
-use Psr\Container\ContainerInterface;
-
 final class Argument implements ArgumentInterface
 {
     /**
@@ -26,15 +24,7 @@ final class Argument implements ArgumentInterface
     /**
      * @inheritdoc
      */
-    public function hasValue(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function values(ContainerInterface $container): array
+    public function values(): array
     {
         return [$this->value];
     }

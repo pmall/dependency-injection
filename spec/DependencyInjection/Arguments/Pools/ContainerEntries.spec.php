@@ -4,8 +4,8 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
 
+use Quanta\DependencyInjection\Arguments\Argument;
 use Quanta\DependencyInjection\Arguments\Placeholder;
-use Quanta\DependencyInjection\Arguments\ContainerEntry;
 use Quanta\DependencyInjection\Parameters\ParameterInterface;
 use Quanta\DependencyInjection\Arguments\Pools\ContainerEntries;
 use Quanta\DependencyInjection\Arguments\Pools\ArgumentPoolInterface;
@@ -52,13 +52,16 @@ describe('ContainerEntries', function () {
 
                 context('when a container entry is defined for this class name', function () {
 
-                    it('should return a ContainerEntry', function () {
+                    it('should return a argument containing the container entry', function () {
+
+                        $instance = new class {};
 
                         $this->container->has->with(SomeClass::class)->returns(true);
+                        $this->container->get->with(SomeClass::class)->returns($instance);
 
                         $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                        expect($test)->toEqual(new ContainerEntry(SomeClass::class));
+                        expect($test)->toEqual(new Argument($instance));
 
                     });
 
@@ -72,7 +75,7 @@ describe('ContainerEntries', function () {
 
                         $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                        expect($test)->toBeAnInstanceOf(Placeholder::class);
+                        expect($test)->toEqual(new Placeholder);
 
                     });
 
@@ -88,7 +91,7 @@ describe('ContainerEntries', function () {
 
                     $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                    expect($test)->toBeAnInstanceOf(Placeholder::class);
+                    expect($test)->toEqual(new Placeholder);
 
                 });
 
@@ -104,7 +107,7 @@ describe('ContainerEntries', function () {
 
                 $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                expect($test)->toBeAnInstanceOf(Placeholder::class);
+                expect($test)->toEqual(new Placeholder);
 
             });
 
