@@ -24,6 +24,14 @@ final class VariadicArgument implements ArgumentInterface
     /**
      * @inheritdoc
      */
+    public function isPlaceholder(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function values(): array
     {
         return $this->values;

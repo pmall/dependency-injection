@@ -6,6 +6,7 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DI\Arguments\Argument;
 use Quanta\DI\Arguments\Placeholder;
+use Quanta\DI\Arguments\VariadicArgument;
 use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\DI\Arguments\Pools\CompositeArgumentPool;
@@ -58,13 +59,13 @@ describe('CompositeArgumentPool', function () {
 
         });
 
-        context('when at least one argument pool returns an argument with values', function () {
+        context('when at least one argument pool does not return a placeholder', function () {
 
-            it('should return the first argument with values', function () {
+            it('should return the first non placeholder argument', function () {
 
-                $this->argument1->values->returns([]);
-                $this->argument2->values->returns(['value']);
-                $this->argument3->values->returns(['value']);
+                $this->argument1->isPlaceholder->returns(true);
+                $this->argument2->isPlaceholder->returns(false);
+                $this->argument3->isPlaceholder->returns(false);
 
                 $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
@@ -74,41 +75,89 @@ describe('CompositeArgumentPool', function () {
 
         });
 
-        context('when no argument pool return an argument with values', function () {
+        context('when all argument pools return a placeholder', function () {
 
             beforeEach(function () {
 
-                $this->argument1->values->returns([]);
-                $this->argument2->values->returns([]);
-                $this->argument3->values->returns([]);
+                $this->argument1->isPlaceholder->returns(true);
+                $this->argument2->isPlaceholder->returns(true);
+                $this->argument3->isPlaceholder->returns(true);
 
             });
 
-            context('when the given parameter has a default value', function () {
+            context('when the given parameter is variadic', function () {
 
-                it('should return an argument containing the default value', function () {
+                it('should return an empty variadic argument', function () {
 
-                    $this->parameter->hasDefaultValue->returns(true);
-
-                    $this->parameter->defaultValue->returns('value');
+                    $this->parameter->isVariadic->returns(true);
 
                     $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                    expect($test)->toEqual(new Argument('value'));
+                    expect($test)->toEqual(new VariadicArgument([]));
 
                 });
 
             });
 
-            context('when the given parameter does not have a default value', function () {
+            context('when the given parameter is not variadic', function () {
 
-                it('should return a placeholder', function () {
+                beforeEach(function () {
 
-                    $this->parameter->hasDefaultValue->returns(false);
+                    $this->parameter->isVariadic->returns(false);
 
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+                });
 
-                    expect($test)->toEqual(new Placeholder);
+                context('when the given parameter has a default value', function () {
+
+                    it('should return an argument containing the default value', function () {
+
+                        $this->parameter->hasDefaultValue->returns(true);
+
+                        $this->parameter->defaultValue->returns('value');
+
+                        $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                        expect($test)->toEqual(new Argument('value'));
+
+                    });
+
+                });
+
+                context('when the given parameter does not have a default value', function () {
+
+                    beforeEach(function () {
+
+                        $this->parameter->hasDefaultValue->returns(false);
+
+                    });
+
+                    context('when the given parameter allows null', function () {
+
+                        it('should return an argument containing null', function () {
+
+                            $this->parameter->allowsNull->returns(true);
+
+                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                            expect($test)->toEqual(new Argument(null));
+
+                        });
+
+                    });
+
+                    context('when the given parameter does not allow null', function () {
+
+                        it('should return a placeholder', function () {
+
+                            $this->parameter->allowsNull->returns(false);
+
+                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                            expect($test)->toEqual(new Placeholder);
+
+                        });
+
+                    });
 
                 });
 

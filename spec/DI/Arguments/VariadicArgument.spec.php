@@ -21,6 +21,18 @@ describe('VariadicArgument', function () {
 
     });
 
+    describe('->isPlaceholder()', function () {
+
+        it('should return false', function () {
+
+            $test = $this->argument->isPlaceholder();
+
+            expect($test)->toBeFalsy();
+
+        });
+
+    });
+
     describe('->values()', function () {
 
         it('should return the array of values', function () {

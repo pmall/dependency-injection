@@ -6,6 +6,7 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DI\Arguments\Argument;
 use Quanta\DI\Arguments\Placeholder;
+use Quanta\DI\Arguments\VariadicArgument;
 use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Parameters\ParameterInterface;
 
@@ -37,12 +38,22 @@ final class CompositeArgumentPool implements ArgumentPoolInterface
 
         $argument = array_reduce($this->pools, $reducer, new Placeholder);
 
-        if (count($argument->values()) == 0) {
-            return $parameter->hasDefaultValue()
-                ? new Argument($parameter->defaultValue())
-                : new Placeholder;
+        if (! $argument->isPlaceholder()) {
+            return $argument;
         }
 
-        return $argument;
+        if ($parameter->isVariadic()) {
+            return new VariadicArgument([]);
+        }
+
+        if ($parameter->hasDefaultValue()) {
+            return new Argument($parameter->defaultValue());
+        }
+
+        if ($parameter->allowsNull()) {
+            return new Argument(null);
+        }
+
+        return new Placeholder;
     }
 }

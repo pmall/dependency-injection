@@ -21,6 +21,18 @@ describe('Placeholder', function () {
 
     });
 
+    describe('->isPlaceholder()', function () {
+
+        it('should return true', function () {
+
+            $test = $this->argument->isPlaceholder();
+
+            expect($test)->toBeTruthy();
+
+        });
+
+    });
+
     describe('->values()', function () {
 
         it('should return an empty array', function () {
