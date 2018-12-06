@@ -49,10 +49,7 @@ final class TypeHintAliasMap implements ArgumentPoolInterface
                 }
 
                 throw new \LogicException(
-                    vsprintf('Parameter %s is variadic and must therefore be associated with an array of values, %s given', [
-                        $parameter->name(),
-                        gettype($value),
-                    ])
+                    (string) new VariadicErrorMessage($parameter, $value)
                 );
             }
         }
