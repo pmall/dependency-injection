@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DependencyInjection\Arguments;
+namespace Quanta\DI\Arguments;
 
 final class Argument implements ArgumentInterface
 {

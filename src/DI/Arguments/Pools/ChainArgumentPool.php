@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DependencyInjection\Arguments\Pools;
+namespace Quanta\DI\Arguments\Pools;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DependencyInjection\Arguments\ArgumentInterface;
-use Quanta\DependencyInjection\Parameters\ParameterInterface;
+use Quanta\DI\Arguments\ArgumentInterface;
+use Quanta\DI\Parameters\ParameterInterface;
 
 final class ChainArgumentPool
 {
@@ -19,15 +19,15 @@ final class ChainArgumentPool
     /**
      * The parameter an argument must be bound to.
      *
-     * @var \Quanta\DependencyInjection\Parameters\ParameterInterface
+     * @var \Quanta\DI\Parameters\ParameterInterface
      */
     private $parameter;
 
     /**
      * Constructor.
      *
-     * @param \Psr\Container\ContainerInterface                         $container
-     * @param \Quanta\DependencyInjection\Parameters\ParameterInterface $parameter
+     * @param \Psr\Container\ContainerInterface         $container
+     * @param \Quanta\DI\Parameters\ParameterInterface  $parameter
      */
     public function __construct(ContainerInterface $container, ParameterInterface $parameter)
     {
@@ -39,9 +39,9 @@ final class ChainArgumentPool
      * Return the argument provided by the given argument pool when the given
      * argument is a placeholder.
      *
-     * @param \Quanta\DependencyInjection\Arguments\ArgumentInterface           $argument
-     * @param \Quanta\DependencyInjection\Arguments\Pools\ArgumentPoolInterface $pool
-     * @return \Quanta\DependencyInjection\Arguments\ArgumentInterface
+     * @param \Quanta\DI\Arguments\ArgumentInterface            $argument
+     * @param \Quanta\DI\Arguments\Pools\ArgumentPoolInterface  $pool
+     * @return \Quanta\DI\Arguments\ArgumentInterface
      */
     public function __invoke(ArgumentInterface $argument, ArgumentPoolInterface $pool): ArgumentInterface
     {

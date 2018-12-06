@@ -4,19 +4,20 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DependencyInjection\Arguments\Argument;
-use Quanta\DependencyInjection\Arguments\Placeholder;
-use Quanta\DependencyInjection\Arguments\VariadicArgument;
-use Quanta\DependencyInjection\Parameters\ParameterInterface;
-use Quanta\DependencyInjection\Arguments\Pools\NameAliasMap;
-use Quanta\DependencyInjection\Arguments\Pools\ArgumentPoolInterface;
+use Quanta\DI\Arguments\Argument;
+use Quanta\DI\Arguments\Placeholder;
+use Quanta\DI\Arguments\VariadicArgument;
+use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Arguments\Pools\NameValueMap;
+use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 
-describe('NameAliasMap', function () {
+describe('NameValueMap', function () {
 
     beforeEach(function () {
 
-        $this->pool = new NameAliasMap([
-            'name1' => SomeClass::class,
+        $this->pool = new NameValueMap([
+            'name1' => 'value',
+            'name2' => ['value1', 'value2', 'value3'],
         ]);
 
     });
@@ -38,12 +39,6 @@ describe('NameAliasMap', function () {
 
         context('when the given parameter name is in the map', function () {
 
-            beforeEach(function () {
-
-                $this->parameter->name->returns('name1');
-
-            });
-
             context('when the given parameter is not variadic', function () {
 
                 beforeEach(function () {
@@ -52,33 +47,29 @@ describe('NameAliasMap', function () {
 
                 });
 
-                context('when the container entry associated to the parameter is not an array', function () {
+                context('when the value associated to the parameter is not an array', function () {
 
-                    it('should return an Argument containing the container entry', function () {
+                    it('should return an Argument containing the value', function () {
 
-                        $instance = new class {};
-
-                        $this->container->get->with(SomeClass::class)->returns($instance);
+                        $this->parameter->name->returns('name1');
 
                         $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                        expect($test)->toEqual(new Argument($instance));
+                        expect($test)->toEqual(new Argument('value'));
 
                     });
 
                 });
 
-                context('when the container entry associated to the parameter is an array', function () {
+                context('when the value associated to the parameter is an array', function () {
 
-                    it('should return an Argument containing the container entry', function () {
+                    it('should return an Argument containing the array', function () {
 
-                        $instances = [new class {}, new class {}, new class {}];
-
-                        $this->container->get->with(SomeClass::class)->returns($instances);
+                        $this->parameter->name->returns('name2');
 
                         $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                        expect($test)->toEqual(new Argument($instances));
+                        expect($test)->toEqual(new Argument(['value1', 'value2', 'value3']));
 
                     });
 
@@ -94,27 +85,25 @@ describe('NameAliasMap', function () {
 
                 });
 
-                context('when the container entry associated to the parameter is an array', function () {
+                context('when the value associated to the parameter is an array', function () {
 
-                    it('should return a VariadicArgument containing the container entry', function () {
+                    it('should return a VariadicArgument containing the value', function () {
 
-                        $instances = [new class {}, new class {}, new class {}];
-
-                        $this->container->get->with(SomeClass::class)->returns($instances);
+                        $this->parameter->name->returns('name2');
 
                         $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                        expect($test)->toEqual(new VariadicArgument($instances));
+                        expect($test)->toEqual(new VariadicArgument(['value1', 'value2', 'value3']));
 
                     });
 
                 });
 
-                context('when the container entry associated to the parameter is not an array', function () {
+                context('when the value associated to the parameter is not an array', function () {
 
                     it('it should throw a logic exception', function () {
 
-                        $this->container->get->with(SomeClass::class)->returns('value');
+                        $this->parameter->name->returns('name1');
 
                         $test = function () {
                             $this->pool->argument($this->container->get(), $this->parameter->get());

@@ -4,12 +4,12 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DependencyInjection\Arguments\Argument;
-use Quanta\DependencyInjection\Arguments\Placeholder;
-use Quanta\DependencyInjection\Arguments\ArgumentInterface;
-use Quanta\DependencyInjection\Parameters\ParameterInterface;
-use Quanta\DependencyInjection\Arguments\Pools\CompositeArgumentPool;
-use Quanta\DependencyInjection\Arguments\Pools\ArgumentPoolInterface;
+use Quanta\DI\Arguments\Argument;
+use Quanta\DI\Arguments\Placeholder;
+use Quanta\DI\Arguments\ArgumentInterface;
+use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Arguments\Pools\CompositeArgumentPool;
+use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 
 describe('CompositeArgumentPool', function () {
 

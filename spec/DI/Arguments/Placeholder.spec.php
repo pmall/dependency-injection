@@ -4,14 +4,14 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DependencyInjection\Arguments\VariadicArgument;
-use Quanta\DependencyInjection\Arguments\ArgumentInterface;
+use Quanta\DI\Arguments\Placeholder;
+use Quanta\DI\Arguments\ArgumentInterface;
 
-describe('VariadicArgument', function () {
+describe('Placeholder', function () {
 
     beforeEach(function () {
 
-        $this->argument = new VariadicArgument(['value1', 'value2', 'value3']);
+        $this->argument = new Placeholder;
 
     });
 
@@ -23,13 +23,13 @@ describe('VariadicArgument', function () {
 
     describe('->values()', function () {
 
-        it('should return the array of values', function () {
+        it('should return an empty array', function () {
 
             $container = mock(ContainerInterface::class);
 
             $test = $this->argument->values($container->get());
 
-            expect($test)->toEqual(['value1', 'value2', 'value3']);
+            expect($test)->toEqual([]);
 
         });
 

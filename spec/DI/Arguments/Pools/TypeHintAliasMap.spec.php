@@ -4,23 +4,19 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DependencyInjection\Arguments\Argument;
-use Quanta\DependencyInjection\Arguments\Placeholder;
-use Quanta\DependencyInjection\Arguments\VariadicArgument;
-use Quanta\DependencyInjection\Parameters\ParameterInterface;
-use Quanta\DependencyInjection\Arguments\Pools\TypeHintValueMap;
-use Quanta\DependencyInjection\Arguments\Pools\ArgumentPoolInterface;
+use Quanta\DI\Arguments\Argument;
+use Quanta\DI\Arguments\Placeholder;
+use Quanta\DI\Arguments\VariadicArgument;
+use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Arguments\Pools\TypeHintAliasMap;
+use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 
-describe('TypeHintValueMap', function () {
+describe('TypeHintAliasMap', function () {
 
     beforeEach(function () {
 
-        $this->instance = new class {};
-        $this->instances = [new class {}, new class {}, new class {}];
-
-        $this->pool = new TypeHintValueMap([
-            SomeClass1::class => $this->instance,
-            SomeClass2::class => $this->instances,
+        $this->pool = new TypeHintAliasMap([
+            SomeClass::class => 'id',
         ]);
 
     });
@@ -58,29 +54,37 @@ describe('TypeHintValueMap', function () {
 
                     });
 
-                    context('when the value associated to the parameter is not an array', function () {
+                    context('when the container entry associated to the parameter is not an array', function () {
 
-                        it('should return an Argument containing the value', function () {
+                        it('should return an Argument containing the container entry', function () {
 
-                            $this->parameter->typeHint->returns(SomeClass1::class);
+                            $instance = new class {};
+
+                            $this->parameter->typeHint->returns(SomeClass::class);
+
+                            $this->container->get->with('id')->returns($instance);
 
                             $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                            expect($test)->toEqual(new Argument($this->instance));
+                            expect($test)->toEqual(new Argument($instance));
 
                         });
 
                     });
 
-                    context('when the value associated to the parameter is an array', function () {
+                    context('when the container entry associated to the parameter is an array', function () {
 
-                        it('should return an Argument containing the array', function () {
+                        it('should return an Argument containing the container entry', function () {
 
-                            $this->parameter->typeHint->returns(SomeClass2::class);
+                            $instances = [new class {}, new class {}, new class {}];
+
+                            $this->parameter->typeHint->returns(SomeClass::class);
+
+                            $this->container->get->with('id')->returns($instances);
 
                             $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                            expect($test)->toEqual(new Argument($this->instances));
+                            expect($test)->toEqual(new Argument($instances));
 
                         });
 
@@ -100,11 +104,15 @@ describe('TypeHintValueMap', function () {
 
                         it('should return a VariadicArgument containing the value', function () {
 
-                            $this->parameter->typeHint->returns(SomeClass2::class);
+                            $instances = [new class {}, new class {}, new class {}];
+
+                            $this->parameter->typeHint->returns(SomeClass::class);
+
+                            $this->container->get->with('id')->returns($instances);
 
                             $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                            expect($test)->toEqual(new VariadicArgument($this->instances));
+                            expect($test)->toEqual(new VariadicArgument($instances));
 
                         });
 
@@ -114,7 +122,11 @@ describe('TypeHintValueMap', function () {
 
                         it('it should throw a logic exception', function () {
 
-                            $this->parameter->typeHint->returns(SomeClass1::class);
+                            $instance = new class {};
+
+                            $this->parameter->typeHint->returns(SomeClass::class);
+
+                            $this->container->get->with('id')->returns($instance);
 
                             $test = function () {
                                 $this->pool->argument($this->container->get(), $this->parameter->get());
@@ -134,7 +146,7 @@ describe('TypeHintValueMap', function () {
 
                 it('should return a placeholder', function () {
 
-                    $this->parameter->typeHint->returns(SomeClass3::class);
+                    $this->parameter->typeHint->returns(SomeClass1::class);
 
                     $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 

@@ -1,27 +1,27 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DependencyInjection\Arguments\Pools;
+namespace Quanta\DI\Arguments\Pools;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DependencyInjection\Arguments\Argument;
-use Quanta\DependencyInjection\Arguments\Placeholder;
-use Quanta\DependencyInjection\Arguments\ArgumentInterface;
-use Quanta\DependencyInjection\Parameters\ParameterInterface;
+use Quanta\DI\Arguments\Argument;
+use Quanta\DI\Arguments\Placeholder;
+use Quanta\DI\Arguments\ArgumentInterface;
+use Quanta\DI\Parameters\ParameterInterface;
 
 final class CompositeArgumentPool implements ArgumentPoolInterface
 {
     /**
      * The argument pools.
      *
-     * @var \Quanta\DependencyInjection\Arguments\Pools\ArgumentPoolInterface[]
+     * @var \Quanta\DI\Arguments\Pools\ArgumentPoolInterface[]
      */
     private $pools;
 
     /**
      * Constructor.
      *
-     * @param \Quanta\DependencyInjection\Arguments\Pools\ArgumentPoolInterface ...$pools
+     * @param \Quanta\DI\Arguments\Pools\ArgumentPoolInterface ...$pools
      */
     public function __construct(ArgumentPoolInterface ...$pools)
     {

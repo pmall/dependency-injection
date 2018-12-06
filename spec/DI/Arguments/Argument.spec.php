@@ -4,8 +4,8 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DependencyInjection\Arguments\Argument;
-use Quanta\DependencyInjection\Arguments\ArgumentInterface;
+use Quanta\DI\Arguments\Argument;
+use Quanta\DI\Arguments\ArgumentInterface;
 
 describe('Argument', function () {
 
