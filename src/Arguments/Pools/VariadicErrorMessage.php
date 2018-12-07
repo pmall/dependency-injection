@@ -32,6 +32,12 @@ final class VariadicErrorMessage
         $this->value = $value;
     }
 
+    /**
+     * Return the message of the exception thrown when trying to bind a non
+     * array value to a variadic parameter.
+     *
+     * @return string
+     */
     public function __toString()
     {
         return vsprintf('Parameter $%s is variadic and must therefore be associated with an array of values, %s given', [
