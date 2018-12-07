@@ -40,7 +40,7 @@ final class TypeHintAliasMap implements ArgumentPoolInterface
 
         $class = $parameter->typeHint();
 
-        if (! array_key_exists($class, $this->aliases)) {
+        if (! key_exists($class, $this->aliases)) {
             return new Placeholder;
         }
 

@@ -37,7 +37,7 @@ final class TypeHintValueMap implements ArgumentPoolInterface
         if ($parameter->hasClassTypeHint()) {
             $class = $parameter->typeHint();
 
-            if (array_key_exists($class, $this->instances)) {
+            if (key_exists($class, $this->instances)) {
                 $value = $this->instances[$class];
 
                 if (! $parameter->isVariadic()) {

@@ -36,7 +36,7 @@ final class NameAliasMap implements ArgumentPoolInterface
     {
         $name = $parameter->name();
 
-        if (! array_key_exists($name, $this->aliases)) {
+        if (! key_exists($name, $this->aliases)) {
             return new Placeholder;
         }
 

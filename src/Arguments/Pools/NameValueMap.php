@@ -36,7 +36,7 @@ final class NameValueMap implements ArgumentPoolInterface
     {
         $name = $parameter->name();
 
-        if (array_key_exists($name, $this->values)) {
+        if (key_exists($name, $this->values)) {
             $value = $this->values[$name];
 
             if (! $parameter->isVariadic()) {
