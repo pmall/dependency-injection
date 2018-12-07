@@ -2,6 +2,8 @@
 
 namespace Quanta\DI;
 
+use Quanta\DI\Parameters\ParameterInterface;
+
 final class CallableAdapter implements BoundCallableInterface
 {
     /**
@@ -27,6 +29,14 @@ final class CallableAdapter implements BoundCallableInterface
     public function expected(): int
     {
         return 0;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function unbound(ParameterInterface ...$parameters): array
+    {
+        return $parameters;
     }
 
     /**

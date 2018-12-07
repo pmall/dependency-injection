@@ -2,6 +2,8 @@
 
 namespace Quanta\DI;
 
+use Quanta\DI\Parameters\ParameterInterface;
+
 interface BoundCallableInterface
 {
     /**
@@ -10,6 +12,14 @@ interface BoundCallableInterface
      * @return int
      */
     public function expected(): int;
+
+    /**
+     * Return the unbound parameters from the given array of parameters.
+     *
+     * @param \Quanta\DI\Parameters\ParameterInterface ...$parameters
+     * @return \Quanta\DI\Parameters\ParameterInterface[]
+     */
+    public function unbound(ParameterInterface ...$parameters): array;
 
     /**
      * Invoke the callable with the given arguments.

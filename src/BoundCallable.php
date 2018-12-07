@@ -3,6 +3,7 @@
 namespace Quanta\DI;
 
 use Quanta\DI\Arguments\ArgumentInterface;
+use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\Exceptions\ArgumentCountErrorMessage;
 
 final class BoundCallable implements BoundCallableInterface
@@ -39,6 +40,19 @@ final class BoundCallable implements BoundCallableInterface
     public function expected(): int
     {
         return $this->callable->expected() + $this->argument->isPlaceholder();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function unbound(ParameterInterface ...$parameters): array
+    {
+        $parameter = array_pop($parameters);
+
+        $head = $this->callable->unbound(...$parameters);
+        $tail = $this->argument->isPlaceholder() ? [$parameter] : [];
+
+        return array_merge($head, $tail);
     }
 
     /**
