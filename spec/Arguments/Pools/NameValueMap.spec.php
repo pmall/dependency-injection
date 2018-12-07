@@ -16,8 +16,8 @@ describe('NameValueMap', function () {
     beforeEach(function () {
 
         $this->pool = new NameValueMap([
-            'name1' => 'value',
-            'name2' => ['value1', 'value2', 'value3'],
+            '$name1' => 'value',
+            '$name2' => ['value1', 'value2', 'value3'],
         ]);
 
     });

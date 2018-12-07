@@ -34,7 +34,7 @@ final class NameValueMap implements ArgumentPoolInterface
      */
     public function argument(ContainerInterface $container, ParameterInterface $parameter): ArgumentInterface
     {
-        $name = $parameter->name();
+        $name = '$' . $parameter->name();
 
         if (key_exists($name, $this->values)) {
             $value = $this->values[$name];

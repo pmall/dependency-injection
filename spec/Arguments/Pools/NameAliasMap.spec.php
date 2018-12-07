@@ -17,7 +17,7 @@ describe('NameAliasMap', function () {
     beforeEach(function () {
 
         $this->pool = new NameAliasMap([
-            'name1' => SomeClass::class,
+            '$name1' => SomeClass::class,
         ]);
 
     });
