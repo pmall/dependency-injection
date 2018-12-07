@@ -36,22 +36,29 @@ final class NameAliasMap implements ArgumentPoolInterface
     {
         $name = $parameter->name();
 
-        if (array_key_exists($name, $this->aliases)) {
+        if (! array_key_exists($name, $this->aliases)) {
+            return new Placeholder;
+        }
+
+        try {
             $value = $container->get($this->aliases[$name]);
-
-            if (! $parameter->isVariadic()) {
-                return new Argument($value);
-            }
-
-            if (is_array($value)) {
-                return new VariadicArgument($value);
-            }
-
+        }
+        catch (\Throwable $e) {
             throw new \LogicException(
-                (string) new VariadicErrorMessage($parameter, $value)
+                (string) new ContainerErrorMessage($parameter, $this->aliases[$name]), 0, $e
             );
         }
 
-        return new Placeholder;
+        if (! $parameter->isVariadic()) {
+            return new Argument($value);
+        }
+
+        if (is_array($value)) {
+            return new VariadicArgument($value);
+        }
+
+        throw new \LogicException(
+            (string) new VariadicErrorMessage($parameter, $value)
+        );
     }
 }

@@ -34,26 +34,35 @@ final class TypeHintAliasMap implements ArgumentPoolInterface
      */
     public function argument(ContainerInterface $container, ParameterInterface $parameter): ArgumentInterface
     {
-        if ($parameter->hasClassTypeHint()) {
-            $class = $parameter->typeHint();
-
-            if (array_key_exists($class, $this->aliases)) {
-                $value = $container->get($this->aliases[$class]);
-
-                if (! $parameter->isVariadic()) {
-                    return new Argument($value);
-                }
-
-                if (is_array($value)) {
-                    return new VariadicArgument($value);
-                }
-
-                throw new \LogicException(
-                    (string) new VariadicErrorMessage($parameter, $value)
-                );
-            }
+        if (! $parameter->hasClassTypeHint()) {
+            return new Placeholder;
         }
 
-        return new Placeholder;
+        $class = $parameter->typeHint();
+
+        if (! array_key_exists($class, $this->aliases)) {
+            return new Placeholder;
+        }
+
+        try {
+            $value = $container->get($this->aliases[$class]);
+        }
+        catch (\Throwable $e) {
+            throw new \LogicException(
+                (string) new ContainerErrorMessage($parameter, $this->aliases[$class]), 0, $e
+            );
+        }
+
+        if (! $parameter->isVariadic()) {
+            return new Argument($value);
+        }
+
+        if (is_array($value)) {
+            return new VariadicArgument($value);
+        }
+
+        throw new \LogicException(
+            (string) new VariadicErrorMessage($parameter, $value)
+        );
     }
 }

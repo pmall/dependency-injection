@@ -10,6 +10,7 @@ use Quanta\DI\Arguments\VariadicArgument;
 use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\DI\Arguments\Pools\TypeHintAliasMap;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
+use Quanta\DI\Arguments\Pools\ContainerErrorMessage;
 
 describe('TypeHintAliasMap', function () {
 
@@ -42,49 +43,95 @@ describe('TypeHintAliasMap', function () {
 
                 $this->parameter->hasClassTypeHint->returns(true);
 
+                $this->parameter->typeHint->returns(SomeClass::class);
+
             });
 
             context('when the given parameter class name is in the map', function () {
 
-                context('when the given parameter is not variadic', function () {
+                context('when the container does not fail to retrieve the entry', function () {
 
-                    beforeEach(function () {
+                    context('when the given parameter is not variadic', function () {
 
-                        $this->parameter->isVariadic->returns(false);
+                        beforeEach(function () {
 
-                    });
+                            $this->parameter->isVariadic->returns(false);
 
-                    context('when the container entry associated to the parameter is not an array', function () {
+                        });
 
-                        it('should return an Argument containing the container entry', function () {
+                        context('when the container entry associated to the parameter is not an array', function () {
 
-                            $instance = new class {};
+                            it('should return an Argument containing the container entry', function () {
 
-                            $this->parameter->typeHint->returns(SomeClass::class);
+                                $instance = new class {};
 
-                            $this->container->get->with('id')->returns($instance);
+                                $this->container->get->with('id')->returns($instance);
 
-                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+                                $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
-                            expect($test)->toEqual(new Argument($instance));
+                                expect($test)->toEqual(new Argument($instance));
+
+                            });
+
+                        });
+
+                        context('when the container entry associated to the parameter is an array', function () {
+
+                            it('should return an Argument containing the container entry', function () {
+
+                                $instances = [new class {}, new class {}, new class {}];
+
+                                $this->container->get->with('id')->returns($instances);
+
+                                $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                                expect($test)->toEqual(new Argument($instances));
+
+                            });
 
                         });
 
                     });
 
-                    context('when the container entry associated to the parameter is an array', function () {
+                    context('when the given parameter is variadic', function () {
 
-                        it('should return an Argument containing the container entry', function () {
+                        beforeEach(function () {
 
-                            $instances = [new class {}, new class {}, new class {}];
+                            $this->parameter->isVariadic->returns(true);
 
-                            $this->parameter->typeHint->returns(SomeClass::class);
+                        });
 
-                            $this->container->get->with('id')->returns($instances);
+                        context('when the value associated to the parameter is an array', function () {
 
-                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+                            it('should return a VariadicArgument containing the value', function () {
 
-                            expect($test)->toEqual(new Argument($instances));
+                                $instances = [new class {}, new class {}, new class {}];
+
+                                $this->container->get->with('id')->returns($instances);
+
+                                $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                                expect($test)->toEqual(new VariadicArgument($instances));
+
+                            });
+
+                        });
+
+                        context('when the value associated to the parameter is not an array', function () {
+
+                            it('it should throw a logic exception', function () {
+
+                                $instance = new class {};
+
+                                $this->container->get->with('id')->returns($instance);
+
+                                $test = function () {
+                                    $this->pool->argument($this->container->get(), $this->parameter->get());
+                                };
+
+                                expect($test)->toThrow(new LogicException);
+
+                            });
 
                         });
 
@@ -92,49 +139,23 @@ describe('TypeHintAliasMap', function () {
 
                 });
 
-                context('when the given parameter is variadic', function () {
+                context('when the container fails to retrieve the entry', function () {
 
-                    beforeEach(function () {
+                    it('should throw a LogicException wrapped around the exception thrown by the container', function () {
 
-                        $this->parameter->isVariadic->returns(true);
+                        $exception = mock(Throwable::class);
 
-                    });
+                        $this->container->get->with('id')->throws($exception);
 
-                    context('when the value associated to the parameter is an array', function () {
+                        $test = function () {
+                            $this->pool->argument($this->container->get(), $this->parameter->get());
+                        };
 
-                        it('should return a VariadicArgument containing the value', function () {
-
-                            $instances = [new class {}, new class {}, new class {}];
-
-                            $this->parameter->typeHint->returns(SomeClass::class);
-
-                            $this->container->get->with('id')->returns($instances);
-
-                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                            expect($test)->toEqual(new VariadicArgument($instances));
-
-                        });
-
-                    });
-
-                    context('when the value associated to the parameter is not an array', function () {
-
-                        it('it should throw a logic exception', function () {
-
-                            $instance = new class {};
-
-                            $this->parameter->typeHint->returns(SomeClass::class);
-
-                            $this->container->get->with('id')->returns($instance);
-
-                            $test = function () {
-                                $this->pool->argument($this->container->get(), $this->parameter->get());
-                            };
-
-                            expect($test)->toThrow(new LogicException);
-
-                        });
+                        expect($test)->toThrow(new LogicException(
+                            (string) new ContainerErrorMessage($this->parameter->get(), 'id'),
+                            0,
+                            $exception->get()
+                        ));
 
                     });
 

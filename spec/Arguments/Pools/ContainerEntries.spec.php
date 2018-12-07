@@ -3,12 +3,14 @@
 use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerExceptionInterface;
 
 use Quanta\DI\Arguments\Argument;
 use Quanta\DI\Arguments\Placeholder;
 use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\DI\Arguments\Pools\ContainerEntries;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
+use Quanta\DI\Arguments\Pools\ContainerErrorMessage;
 
 describe('ContainerEntries', function () {
 
@@ -52,16 +54,47 @@ describe('ContainerEntries', function () {
 
                 context('when a container entry is defined for this class name', function () {
 
-                    it('should return a argument containing the container entry', function () {
-
-                        $instance = new class {};
+                    beforeEach(function () {
 
                         $this->container->has->with(SomeClass::class)->returns(true);
-                        $this->container->get->with(SomeClass::class)->returns($instance);
 
-                        $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+                    });
 
-                        expect($test)->toEqual(new Argument($instance));
+                    context('when the container does not fail to retrieve the entry', function () {
+
+                        it('should return a argument containing the container entry', function () {
+
+                            $instance = new class {};
+
+                            $this->container->get->with(SomeClass::class)->returns($instance);
+
+                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                            expect($test)->toEqual(new Argument($instance));
+
+                        });
+
+                    });
+
+                    context('when the container fails to retrieve the entry', function () {
+
+                        it('should throw a LogicException wrapped around the exception thrown by the container', function () {
+
+                            $exception = mock(Throwable::class);
+
+                            $this->container->get->with(SomeClass::class)->throws($exception);
+
+                            $test = function () {
+                                $this->pool->argument($this->container->get(), $this->parameter->get());
+                            };
+
+                            expect($test)->toThrow(new LogicException(
+                                (string) new ContainerErrorMessage($this->parameter->get(), SomeClass::class),
+                                0,
+                                $exception->get()
+                            ));
+
+                        });
 
                     });
 

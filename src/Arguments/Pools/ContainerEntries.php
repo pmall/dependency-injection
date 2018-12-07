@@ -16,14 +16,23 @@ final class ContainerEntries implements ArgumentPoolInterface
      */
     public function argument(ContainerInterface $container, ParameterInterface $parameter): ArgumentInterface
     {
-        if ($parameter->hasClassTypeHint() && ! $parameter->isVariadic()) {
-            $class = $parameter->typeHint();
-
-            return $container->has($class)
-                ? new Argument($container->get($class))
-                : new Placeholder;
+        if (! $parameter->hasClassTypeHint() || $parameter->isVariadic()) {
+            return new Placeholder;
         }
 
-        return new Placeholder;
+        $class = $parameter->typeHint();
+
+        if (! $container->has($class)) {
+            return new Placeholder;
+        }
+
+        try {
+            return new Argument($container->get($class));
+        }
+        catch (\Throwable $e) {
+            throw new \LogicException(
+                (string) new ContainerErrorMessage($parameter, $class), 0, $e
+            );
+        }
     }
 }
