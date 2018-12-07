@@ -66,7 +66,7 @@ describe('BoundCallable', function () {
 
         beforeEach(function () {
 
-            $this->delegate->expected->returns(3);
+            $this->delegate->expected->returns(2);
 
         });
 
@@ -84,9 +84,9 @@ describe('BoundCallable', function () {
 
                 it('should call the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('v1', 'v2', 'v3', 'v4')->returns('value');
+                    $this->delegate->__invoke->with('v1', 'v2', 'v3')->returns('value');
 
-                    $test = ($this->callable)('v1', 'v2', 'v3', 'v4');
+                    $test = ($this->callable)('v1', 'v2', 'v3');
 
                     expect($test)->toEqual('value');
 
@@ -98,9 +98,9 @@ describe('BoundCallable', function () {
 
                 it('should call the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('v1', 'v2', 'v3', 'v4', 'v5')->returns('value');
+                    $this->delegate->__invoke->with('v1', 'v2', 'v3', 'v4')->returns('value');
 
-                    $test = ($this->callable)('v1', 'v2', 'v3', 'v4', 'v5');
+                    $test = ($this->callable)('v1', 'v2', 'v3', 'v4');
 
                     expect($test)->toEqual('value');
 
@@ -114,10 +114,10 @@ describe('BoundCallable', function () {
 
                     ArgumentCountErrorMessage::testing();
 
-                    $test = function () { ($this->callable)('v1', 'v2', 'v3'); };
+                    $test = function () { ($this->callable)('v1', 'v2'); };
 
                     expect($test)->toThrow(new ArgumentCountError(
-                        (string) new ArgumentCountErrorMessage(4, 3)
+                        (string) new ArgumentCountErrorMessage(3, 2)
                     ));
 
                 });
@@ -132,7 +132,7 @@ describe('BoundCallable', function () {
 
                 $this->argument->isPlaceholder->returns(false);
 
-                $this->argument->values->returns(['v2', 'v3']);
+                $this->argument->values->returns(['v3', 'v4']);
 
             });
 
@@ -140,9 +140,9 @@ describe('BoundCallable', function () {
 
                 it('should call the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('v1', 'v2', 'v3')->returns('value');
+                    $this->delegate->__invoke->with('v1', 'v2', 'v3', 'v4')->returns('value');
 
-                    $test = ($this->callable)('v1');
+                    $test = ($this->callable)('v1', 'v2');
 
                     expect($test)->toEqual('value');
 
@@ -154,9 +154,9 @@ describe('BoundCallable', function () {
 
                 it('should call the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('v1', 'v2', 'v3', 'v4')->returns('value');
+                    $this->delegate->__invoke->with('v1', 'v2', 'v3', 'v4', 'v5')->returns('value');
 
-                    $test = ($this->callable)('v1', 'v4');
+                    $test = ($this->callable)('v1', 'v2', 'v5');
 
                     expect($test)->toEqual('value');
 
@@ -170,10 +170,10 @@ describe('BoundCallable', function () {
 
                     ArgumentCountErrorMessage::testing();
 
-                    $test = function () { ($this->callable)(); };
+                    $test = function () { ($this->callable)('v1'); };
 
                     expect($test)->toThrow(new ArgumentCountError(
-                        (string) new ArgumentCountErrorMessage(3, 2)
+                        (string) new ArgumentCountErrorMessage(2, 1)
                     ));
 
                 });

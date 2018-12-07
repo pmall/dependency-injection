@@ -46,23 +46,19 @@ final class BoundCallable implements BoundCallableInterface
      */
     public function __invoke(...$xs)
     {
-        $values = $this->argument->values();
-
         // number of expected arguments === number of remaining placeholders.
         $expected = $this->expected();
 
-        // those arguments position within the given argument list is the number
-        // of expected arguments.
-        array_splice($xs, $expected - count($values), 0, $values);
-
-        // invoke the callable when there is as many arguments as expected.
-        if (count($xs) >= $expected) {
-            return ($this->callable)(...$xs);
+        // fail when there is less given arguments than expected.
+        if (count($xs) < $expected) {
+            throw new \ArgumentCountError(
+                (string) new ArgumentCountErrorMessage($expected, count($xs))
+            );
         }
 
-        // fail when there is less arguments than expected.
-        throw new \ArgumentCountError(
-            (string) new ArgumentCountErrorMessage($expected, count($xs))
-        );
+        // inject the argument values into the given arguments.
+        array_splice($xs, $expected, 0, $this->argument->values());
+
+        return ($this->callable)(...$xs);
     }
 }
