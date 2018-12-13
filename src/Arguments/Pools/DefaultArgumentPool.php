@@ -6,27 +6,20 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Parameters\ParameterInterface;
-use Quanta\Exceptions\ArrayTypeCheckTrait;
-use Quanta\Exceptions\ArrayArgumentTypeErrorMessage;
 
 final class DefaultArgumentPool extends AbstractArgumentPoolDecorator
 {
-    use ArrayTypeCheckTrait;
-
     /**
      * Constructor.
      *
-     * @var string[]    $aliases
-     * @var array       $values
-     * @throws \InvalidArgumentException
+     * @param array $options
      */
-    public function __construct(array $aliases = [], array $values = [])
+    public function __construct(array $options = [])
     {
-        if (! $this->areAllTypedAs('string', $aliases)) {
-            throw new \InvalidArgumentException(
-                (string) new ArrayArgumentTypeErrorMessage(1, 'string', $aliases)
-            );
-        }
+        $aliases = array_filter($options, [$this, 'isAlias']);
+
+        $aliases = array_map([$this, 'cleanUpAlias'], $aliases);
+        $values = array_diff_key($options, $aliases);
 
         parent::__construct(new CompositeArgumentPool(...[
             new NameValueMap(array_filter($values, [$this, 'isParameterName'], ARRAY_FILTER_USE_KEY)),
@@ -35,6 +28,28 @@ final class DefaultArgumentPool extends AbstractArgumentPoolDecorator
             new TypeHintAliasMap(array_filter($aliases, [$this, 'isNotParameterName'], ARRAY_FILTER_USE_KEY)),
             new ContainerEntries,
         ]));
+    }
+
+    /**
+     * Return whether the given value is an alias.
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    private function isAlias($value): bool
+    {
+        return is_string($value) && substr($value, 0, 1) == '@';
+    }
+
+    /**
+     * Clean up the given alias string.
+     *
+     * @param string $alias
+     * @return string
+     */
+    private function cleanUpAlias(string $alias): string
+    {
+        return substr($alias, 1);
     }
 
     /**

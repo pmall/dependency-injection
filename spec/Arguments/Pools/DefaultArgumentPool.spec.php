@@ -5,6 +5,7 @@ use function Eloquent\Phony\Kahlan\mock;
 use Psr\Container\ContainerInterface;
 
 use Quanta\DI\Arguments\Argument;
+use Quanta\DI\Arguments\Placeholder;
 use Quanta\DI\Arguments\Pools\DefaultArgumentPool;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 use Quanta\DI\Parameters\ParameterInterface;
@@ -17,13 +18,10 @@ describe('CompositeArgumentPool', function () {
         beforeEach(function () {
 
             $this->pool = new DefaultArgumentPool([
-                '$p1' => SomeClass1::class,
-                '$p2' => SomeClass2::class,
-                AliasedClass1::class => 'id1',
-                AliasedClass2::class => 'id2',
-            ], [
+                '$p1' => '@' . SomeClass1::class,
                 '$p2' => 'value1',
-                AliasedClass2::class => 'value2',
+                AliasedInsterface1::class => '@' . SomeClass2::class,
+                AliasedInsterface2::class => 'value2',
             ]);
 
         });
@@ -43,141 +41,176 @@ describe('CompositeArgumentPool', function () {
 
             });
 
-            context('when the parameter name is only in the alias map', function () {
+            context('when the parameter name is an option key', function () {
 
-                it('should return the value of the alias associated with the parameter name', function () {
+                context('when the associated value starts with @', function () {
 
-                    $this->parameter->name->returns('p1');
-                    $this->container->get->with(SomeClass1::class)->returns('value');
+                    context('when the container does not fail to retrieve the entry associated with the alias', function () {
 
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+                        it('should return an argument containing the container entry associated with the alias', function () {
 
-                    expect($test)->toEqual(new Argument('value'));
+                            $instance = new class {};
+
+                            $this->container->get->with(SomeClass1::class)->returns($instance);
+                            $this->parameter->name->returns('p1');
+
+                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                            expect($test)->toEqual(new Argument($instance));
+
+                        });
+
+                    });
+
+                    context('when the container fails to retrieve the entry associated with the alias', function () {
+
+                        it('should throw a LogicException', function () {
+
+                            $exception = mock(Throwable::class);
+
+                            $this->container->get->with(SomeClass1::class)->throws($exception);
+                            $this->parameter->name->returns('p1');
+
+                            $test = function () {
+                                $this->pool->argument($this->container->get(), $this->parameter->get());
+                            };
+
+                            expect($test)->toThrow(new LogicException('', 0, $exception->get()));
+
+                        });
+
+                    });
+
+                });
+
+                context('when the associated value does not start with @', function () {
+
+                    it('should return an argument containing the associated value', function () {
+
+                        $this->parameter->name->returns('p2');
+
+                        $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                        expect($test)->toEqual(new Argument('value1'));
+
+                    });
 
                 });
 
             });
 
-            context('when the parameter name is both in the alias map and in the value map', function () {
+            context('when the parameter name is not an option key', function () {
 
-                it('should return the value associated with the parameter name', function () {
-
-                    $this->parameter->name->returns('p2');
-
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                    expect($test)->toEqual(new Argument('value1'));
-
-                });
-
-            });
-
-            context('when the parameter class name is only in the alias map', function () {
-
-                it('should return the value of the alias associated with the parameter class name', function () {
+                beforeEach(function () {
 
                     $this->parameter->name->returns('p3');
-                    $this->parameter->hasClassTypeHint->returns(true);
-                    $this->parameter->typeHint->returns(AliasedClass1::class);
-                    $this->container->get->with('id1')->returns('value');
 
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+                });
 
-                    expect($test)->toEqual(new Argument('value'));
+                context('when the parameter class name is an option key', function () {
+
+                    context('when the associated value starts with @', function () {
+
+                        context('when the container does not fail to retrieve the entry associated with the alias', function () {
+
+                            it('should return an argument containing the container entry associated with the alias', function () {
+
+                                $instance = new class {};
+
+                                $this->container->get->with(SomeClass2::class)->returns($instance);
+                                $this->parameter->hasClassTypeHint->returns(true);
+                                $this->parameter->typeHint->returns(AliasedInsterface1::class);
+
+                                $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                                expect($test)->toEqual(new Argument($instance));
+
+                            });
+
+                        });
+
+                        context('when the container fails to retrieve the entry associated with the alias', function () {
+
+                            it('should throw a LogicException', function () {
+
+                                $exception = mock(Throwable::class);
+
+                                $this->container->get->with(SomeClass2::class)->throws($exception);
+                                $this->parameter->hasClassTypeHint->returns(true);
+                                $this->parameter->typeHint->returns(AliasedInsterface1::class);
+
+                                $test = function () {
+                                    $this->pool->argument($this->container->get(), $this->parameter->get());
+                                };
+
+                                expect($test)->toThrow(new LogicException('', 0, $exception->get()));
+
+                            });
+
+                        });
+
+                    });
+
+                    context('when the associated value does not start with @', function () {
+
+                        it('should return an argument containing the associated value', function () {
+
+                            $this->parameter->hasClassTypeHint->returns(true);
+                            $this->parameter->typeHint->returns(AliasedInsterface2::class);
+
+                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                            expect($test)->toEqual(new Argument('value2'));
+
+                        });
+
+                    });
+
+                });
+
+                context('when the parameter class name is not an option key', function () {
+
+                    beforeEach(function () {
+
+                        $this->parameter->hasClassTypeHint->returns(true);
+                        $this->parameter->typeHint->returns(AliasedInsterface3::class);
+
+                    });
+
+                    context('when the container has an entry associated to the parameter class name', function () {
+
+                        it('should return an argument containing the container entry associated with the parameter class name', function () {
+
+                            $instance = new class {};
+
+                            $this->container->has->with(AliasedInsterface3::class)->returns(true);
+                            $this->container->get->with(AliasedInsterface3::class)->returns($instance);
+
+                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                            expect($test)->toEqual(new Argument($instance));
+
+                        });
+
+                    });
+
+                    context('when the container does not have an entry associated to the parameter class name', function () {
+
+                        it('should return a placeholder', function () {
+
+                            $this->container->has->with(AliasedInsterface3::class)->returns(false);
+
+                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
+
+                            expect($test)->toEqual(new Placeholder);
+
+                        });
+
+                    });
 
                 });
 
             });
-
-            context('when the parameter class name is both in the alias map and in the value map', function () {
-
-                it('should return the value associated with the parameter class name', function () {
-
-                    $this->parameter->name->returns('p3');
-                    $this->parameter->hasClassTypeHint->returns(true);
-                    $this->parameter->typeHint->returns(AliasedClass2::class);
-
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                    expect($test)->toEqual(new Argument('value2'));
-
-                });
-
-            });
-
-            context('when both the parameter name and the parameter class name is in the alias map', function () {
-
-                it('should return the value of the alias associated with the parameter name', function () {
-
-                    $this->parameter->name->returns('p1');
-                    $this->parameter->hasClassTypeHint->returns(true);
-                    $this->parameter->typeHint->returns(AliasedClass1::class);
-                    $this->container->get->with(SomeClass1::class)->returns('value');
-
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                    expect($test)->toEqual(new Argument('value'));
-
-                });
-
-            });
-
-            context('when both the parameter name and the parameter class name is in the value map', function () {
-
-                it('should return the value associated with the parameter name', function () {
-
-                    $this->parameter->name->returns('p2');
-                    $this->parameter->hasClassTypeHint->returns(true);
-                    $this->parameter->typeHint->returns(AliasedClass2::class);
-
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                    expect($test)->toEqual(new Argument('value1'));
-
-                });
-
-            });
-
-            context('when the parameter name and class name are not in the alias map and the values map',function () {
-
-                it('should return the value provided by the container', function () {
-
-                    $this->parameter->hasClassTypeHint->returns(true);
-                    $this->parameter->typeHint->returns(AliasedClass::class);
-                    $this->container->has->with(AliasedClass::class)->returns(true);
-                    $this->container->get->with(AliasedClass::class)->returns('value');
-
-                    $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                    expect($test)->toEqual(new Argument('value'));
-
-                });
-
-            });
-
-        });
-
-    });
-
-    context('when at least one value of the given array of aliases is not a string', function () {
-
-        it('should throw an InvalidArgumentException', function () {
-
-            ArrayArgumentTypeErrorMessage::testing();
-
-            $aliases = [
-                '$p1' => SomeClass1::class,
-                '$p2' => 1,
-                '$p3' => SomeClass2::class,
-            ];
-
-            $test = function () use ($aliases) {
-                new DefaultArgumentPool($aliases);
-            };
-
-            expect($test)->toThrow(new InvalidArgumentException(
-                (string) new ArrayArgumentTypeErrorMessage(1, 'string', $aliases)
-            ));
 
         });
 
