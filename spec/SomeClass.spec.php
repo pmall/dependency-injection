@@ -22,6 +22,20 @@ describe('SomeClass', function () {
 
     });
 
+    describe('->name()', function () {
+
+        it('should return the name of the class', function () {
+
+            $class = new SomeClass(TestClass::class);
+
+            $test = $class->name();
+
+            expect($test)->toEqual(TestClass::class);
+
+        });
+
+    });
+
     describe('->parameters()', function () {
 
         context('when the class has no constructor', function () {

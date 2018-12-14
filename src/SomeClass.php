@@ -25,6 +25,16 @@ final class SomeClass implements InjectableCallableInterface
     }
 
     /**
+     * Return the name of the class.
+     *
+     * @return string
+     */
+    public function name(): string
+    {
+        return $this->class;
+    }
+
+    /**
      * @inheritdoc
      */
     public function parameters(): array
