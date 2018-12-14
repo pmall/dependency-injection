@@ -8,8 +8,9 @@ use Quanta\DI\InjectionPass;
 use Quanta\DI\BoundCallable;
 use Quanta\DI\CallableAdapter;
 use Quanta\DI\Arguments\ArgumentInterface;
-use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
+use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Parameters\ParameterCollectionInterface;
 
 describe('InjectionPass', function () {
 
@@ -17,16 +18,23 @@ describe('InjectionPass', function () {
 
         $this->callable = function () {};
         $this->pool = mock(ArgumentPoolInterface::class);
+        $this->collection = mock(ParameterCollectionInterface::class);
+
+        $this->pass = new InjectionPass(...[
+            $this->callable,
+            $this->pool->get(),
+            $this->collection->get(),
+        ]);
 
     });
 
-    context('when there is no parameters', function () {
+    context('when the parameter collection has no parameter', function () {
 
         beforeEach(function () {
 
             $this->container = mock(ContainerInterface::class);
 
-            $this->pass = new InjectionPass($this->callable, $this->pool->get());
+            $this->collection->parameters->returns([]);
 
         });
 
@@ -58,7 +66,7 @@ describe('InjectionPass', function () {
             $this->argument2 = mock(ArgumentInterface::class);
             $this->argument3 = mock(ArgumentInterface::class);
 
-            $this->pass = new InjectionPass($this->callable, $this->pool->get(), ...[
+            $this->collection->parameters->returns([
                 $this->parameter1->get(),
                 $this->parameter2->get(),
                 $this->parameter3->get(),

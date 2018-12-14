@@ -6,6 +6,7 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
+use Quanta\DI\Parameters\ParameterCollectionInterface;
 
 final class InjectionPass
 {
@@ -24,24 +25,24 @@ final class InjectionPass
     public $pool;
 
     /**
-     * The array of the callable parameters.
+     * The parameter collection.
      *
-     * @var \Quanta\DI\Parameters\ParameterInterface[]
+     * @var \Quanta\DI\Parameters\ParameterCollectionInterface
      */
-    public $parameters;
+    public $collection;
 
     /**
      * Constructor.
      *
-     * @param callable                                          $callable
-     * @param \Quanta\DI\Arguments\Pools\ArgumentPoolInterface  $pool
-     * @param \Quanta\DI\Parameters\ParameterInterface          ...$parameters
+     * @param callable                                              $callable
+     * @param \Quanta\DI\Arguments\Pools\ArgumentPoolInterface      $pool
+     * @param \Quanta\DI\Parameters\ParameterCollectionInterface    $collection
      */
-    public function __construct(callable $callable, ArgumentPoolInterface $pool, ParameterInterface ...$parameters)
+    public function __construct(callable $callable, ArgumentPoolInterface $pool, ParameterCollectionInterface $collection)
     {
         $this->callable = $callable;
         $this->pool = $pool;
-        $this->parameters = $parameters;
+        $this->collection = $collection;
     }
 
     /**
@@ -52,9 +53,10 @@ final class InjectionPass
      */
     public function injected(ContainerInterface $container): BoundCallableInterface
     {
+        $parameters = $this->collection->parameters();
         $bound = new CallableAdapter($this->callable);
         $reducer = new BindCallable($container, $this->pool);
 
-        return array_reduce($this->parameters, $reducer, $bound);
+        return array_reduce($parameters, $reducer, $bound);
     }
 }
