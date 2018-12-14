@@ -4,6 +4,8 @@ namespace Quanta\DI;
 
 use Psr\Container\ContainerInterface;
 
+use Quanta\DI\Arguments\Pools\FallbackArgumentPool;
+use Quanta\DI\Arguments\Pools\CompositeArgumentPool;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 
 final class InjectionPass

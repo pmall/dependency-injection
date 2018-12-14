@@ -9,9 +9,8 @@ use Quanta\DI\Arguments\Placeholder;
 use Quanta\DI\Arguments\Pools\DefaultArgumentPool;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 use Quanta\DI\Parameters\ParameterInterface;
-use Quanta\Exceptions\ArrayArgumentTypeErrorMessage;
 
-describe('CompositeArgumentPool', function () {
+describe('DefaultArgumentPool', function () {
 
     context('when all values of the given array of aliases are strings', function () {
 
@@ -41,7 +40,7 @@ describe('CompositeArgumentPool', function () {
 
             });
 
-            context('when the parameter name is an option key', function () {
+            context('when the parameter name is in the options array keys', function () {
 
                 context('when the associated value starts with @', function () {
 
@@ -99,7 +98,7 @@ describe('CompositeArgumentPool', function () {
 
             });
 
-            context('when the parameter name is not an option key', function () {
+            context('when the parameter name is not in the options array keys', function () {
 
                 beforeEach(function () {
 
@@ -107,7 +106,7 @@ describe('CompositeArgumentPool', function () {
 
                 });
 
-                context('when the parameter class name is an option key', function () {
+                context('when the parameter class name is in the options array keys', function () {
 
                     context('when the associated value starts with @', function () {
 
@@ -161,48 +160,6 @@ describe('CompositeArgumentPool', function () {
                             $test = $this->pool->argument($this->container->get(), $this->parameter->get());
 
                             expect($test)->toEqual(new Argument('value2'));
-
-                        });
-
-                    });
-
-                });
-
-                context('when the parameter class name is not an option key', function () {
-
-                    beforeEach(function () {
-
-                        $this->parameter->hasClassTypeHint->returns(true);
-                        $this->parameter->typeHint->returns(AliasedInsterface3::class);
-
-                    });
-
-                    context('when the container has an entry associated to the parameter class name', function () {
-
-                        it('should return an argument containing the container entry associated with the parameter class name', function () {
-
-                            $instance = new class {};
-
-                            $this->container->has->with(AliasedInsterface3::class)->returns(true);
-                            $this->container->get->with(AliasedInsterface3::class)->returns($instance);
-
-                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                            expect($test)->toEqual(new Argument($instance));
-
-                        });
-
-                    });
-
-                    context('when the container does not have an entry associated to the parameter class name', function () {
-
-                        it('should return a placeholder', function () {
-
-                            $this->container->has->with(AliasedInsterface3::class)->returns(false);
-
-                            $test = $this->pool->argument($this->container->get(), $this->parameter->get());
-
-                            expect($test)->toEqual(new Placeholder);
 
                         });
 

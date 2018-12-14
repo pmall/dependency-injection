@@ -36,24 +36,6 @@ final class CompositeArgumentPool implements ArgumentPoolInterface
     {
         $reducer = new ChainArgumentPool($container, $parameter);
 
-        $argument = array_reduce($this->pools, $reducer, new Placeholder);
-
-        if (! $argument->isPlaceholder()) {
-            return $argument;
-        }
-
-        if ($parameter->isVariadic()) {
-            return new VariadicArgument([]);
-        }
-
-        if ($parameter->hasDefaultValue()) {
-            return new Argument($parameter->defaultValue());
-        }
-
-        if ($parameter->allowsNull()) {
-            return new Argument(null);
-        }
-
-        return new Placeholder;
+        return array_reduce($this->pools, $reducer, new Placeholder);
     }
 }

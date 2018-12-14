@@ -26,7 +26,7 @@ final class DefaultArgumentPool extends AbstractArgumentPoolDecorator
             new NameAliasMap(array_filter($aliases, [$this, 'isParameterName'], ARRAY_FILTER_USE_KEY)),
             new TypeHintValueMap(array_filter($values, [$this, 'isNotParameterName'], ARRAY_FILTER_USE_KEY)),
             new TypeHintAliasMap(array_filter($aliases, [$this, 'isNotParameterName'], ARRAY_FILTER_USE_KEY)),
-            new ContainerEntries,
+            new FallbackArgumentPool,
         ]));
     }
 

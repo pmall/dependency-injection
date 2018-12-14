@@ -29,13 +29,17 @@ describe('InjectionPass', function () {
 
     });
 
-    context('when the injectable callable has no parameter', function () {
+    describe('->injected()', function () {
 
-        describe('->injected()', function () {
+        beforeEach(function () {
 
-            it('should return a CallableAdapter from the injectable callable', function () {
+            $this->container = mock(ContainerInterface::class);
 
-                $this->container = mock(ContainerInterface::class);
+        });
+
+        context('when the blueprit provides no parameter', function () {
+
+            it('should return a CallableAdapter from the blueprit', function () {
 
                 $this->blueprint->parameters->returns([]);
 
@@ -49,43 +53,37 @@ describe('InjectionPass', function () {
 
         });
 
-    });
+        context('when the blueprit provides at least one parameter', function () {
 
-    context('when the injectable callable has at least one parameter', function () {
+            beforeEach(function () {
 
-        beforeEach(function () {
+                $this->parameter1 = mock(ParameterInterface::class);
+                $this->parameter2 = mock(ParameterInterface::class);
+                $this->parameter3 = mock(ParameterInterface::class);
 
-            $this->container = mock(ContainerInterface::class);
+                $this->argument1 = mock(ArgumentInterface::class);
+                $this->argument2 = mock(ArgumentInterface::class);
+                $this->argument3 = mock(ArgumentInterface::class);
 
-            $this->parameter1 = mock(ParameterInterface::class);
-            $this->parameter2 = mock(ParameterInterface::class);
-            $this->parameter3 = mock(ParameterInterface::class);
+                $this->blueprint->parameters->returns([
+                    $this->parameter1->get(),
+                    $this->parameter2->get(),
+                    $this->parameter3->get(),
+                ]);
 
-            $this->argument1 = mock(ArgumentInterface::class);
-            $this->argument2 = mock(ArgumentInterface::class);
-            $this->argument3 = mock(ArgumentInterface::class);
+                $this->pool->argument
+                    ->with($this->container, $this->parameter1)
+                    ->returns($this->argument1);
 
-            $this->blueprint->parameters->returns([
-                $this->parameter1->get(),
-                $this->parameter2->get(),
-                $this->parameter3->get(),
-            ]);
+                $this->pool->argument
+                    ->with($this->container, $this->parameter2)
+                    ->returns($this->argument2);
 
-            $this->pool->argument
-                ->with($this->container, $this->parameter1)
-                ->returns($this->argument1);
+                $this->pool->argument
+                    ->with($this->container, $this->parameter3)
+                    ->returns($this->argument3);
 
-            $this->pool->argument
-                ->with($this->container, $this->parameter2)
-                ->returns($this->argument2);
-
-            $this->pool->argument
-                ->with($this->container, $this->parameter3)
-                ->returns($this->argument3);
-
-        });
-
-        describe('->injected()', function () {
+            });
 
             it('should return a BoundCallable binding the callable to the arguments provided by the argument pool', function () {
 
