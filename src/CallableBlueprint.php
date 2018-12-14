@@ -5,7 +5,7 @@ namespace Quanta\DI;
 use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\DI\Parameters\ReflectionParameterAdapter;
 
-final class SomeCallable implements InjectableCallableInterface
+final class CallableBlueprint implements BlueprintInterface
 {
     /**
      * The callable.
@@ -38,9 +38,9 @@ final class SomeCallable implements InjectableCallableInterface
     /**
      * @inheritdoc
      */
-    public function __invoke(...$xs)
+    public function callable(): callable
     {
-        return ($this->callable)(...$xs);
+        return $this->callable;
     }
 
     /**

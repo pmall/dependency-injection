@@ -5,13 +5,6 @@ namespace Quanta\DI;
 interface BoundCallableInterface
 {
     /**
-     * Return the expected number of argument.
-     *
-     * @return int
-     */
-    public function expected(): int;
-
-    /**
      * Return the unbound parameters.
      *
      * @param bool ...$vector

@@ -9,11 +9,11 @@ use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 final class InjectionPass
 {
     /**
-     * The injectable callable.
+     * The blueprint providing the callable and its parameters.
      *
-     * @var \Quanta\DI\InjectableCallableInterface
+     * @var \Quanta\DI\BlueprintInterface
      */
-    public $callable;
+    public $blueprint;
 
     /**
      * The argument pool providing arguments.
@@ -25,12 +25,12 @@ final class InjectionPass
     /**
      * Constructor.
      *
-     * @param \Quanta\DI\InjectableCallableInterface            $callable
+     * @param \Quanta\DI\BlueprintInterface                     $blueprint
      * @param \Quanta\DI\Arguments\Pools\ArgumentPoolInterface  $pool
      */
-    public function __construct(InjectableCallableInterface $callable, ArgumentPoolInterface $pool)
+    public function __construct(BlueprintInterface $blueprint, ArgumentPoolInterface $pool)
     {
-        $this->callable = $callable;
+        $this->blueprint = $blueprint;
         $this->pool = $pool;
     }
 
@@ -42,10 +42,12 @@ final class InjectionPass
      */
     public function injected(ContainerInterface $container): BoundCallableInterface
     {
-        $parameters = $this->callable->parameters();
-        $bound = new InjectableCallableAdapter($this->callable);
+        $callable = $this->blueprint->callable();
+        $parameters = $this->blueprint->parameters();
+
+        $callable = new CallableAdapter($callable, ...$parameters);
         $reducer = new BindCallable($container, $this->pool);
 
-        return array_reduce($parameters, $reducer, $bound);
+        return array_reduce($parameters, $reducer, $callable);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Quanta\DI;
 
-interface InjectableCallableInterface
+interface BlueprintInterface
 {
     /**
      * Return the callable parameters.
@@ -12,10 +12,9 @@ interface InjectableCallableInterface
     public function parameters(): array;
 
     /**
-     * Invoke the callable with the given arguments.
+     * Return the callable to invoke.
      *
-     * @param mixed ...$xs
-     * @return $mixed
+     * @return callable
      */
-    public function __invoke(...$xs);
+    public function callable(): callable;
 }

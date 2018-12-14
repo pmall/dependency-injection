@@ -6,7 +6,6 @@ use Quanta\DI\BoundCallable;
 use Quanta\DI\BoundCallableInterface;
 use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Parameters\ParameterInterface;
-use Quanta\Exceptions\ArgumentCountErrorMessage;
 
 describe('BoundCallable', function () {
 
@@ -25,44 +24,6 @@ describe('BoundCallable', function () {
 
     });
 
-    describe('->expected()', function () {
-
-        beforeEach(function () {
-
-            $this->delegate->expected->returns(1);
-
-        });
-
-        context('when the argument is a placeholder', function () {
-
-            it('should return the delegate number of expected arguments + 1', function () {
-
-                $this->argument->isPlaceholder->returns(true);
-
-                $test = $this->callable->expected();
-
-                expect($test)->toEqual(2);
-
-            });
-
-        });
-
-        context('when the argument is not a placeholder', function () {
-
-            it('should return the delegate number of expected arguments', function () {
-
-                $this->argument->isPlaceholder->returns(false);
-
-                $test = $this->callable->expected();
-
-                expect($test)->toEqual(1);
-
-            });
-
-        });
-
-    });
-
     describe('->unbound()', function () {
 
         beforeEach(function () {
@@ -70,16 +31,16 @@ describe('BoundCallable', function () {
             $this->parameter1 = mock(ParameterInterface::class);
             $this->parameter2 = mock(ParameterInterface::class);
 
+            $this->delegate->unbound->returns([
+                $this->parameter1->get(),
+                $this->parameter2->get(),
+            ]);
+
         });
 
         context('when the argument is a placeholder', function () {
 
             it('should add true to the given vector and call the delegate ->unbound() method with the new vector', function () {
-
-                $this->delegate->unbound->with(true, false, true)->returns([
-                    $this->parameter1->get(),
-                    $this->parameter2->get(),
-                ]);
 
                 $this->argument->isPlaceholder->returns(true);
 
@@ -90,6 +51,8 @@ describe('BoundCallable', function () {
                 expect($test[0])->toBe($this->parameter1->get());
                 expect($test[1])->toBe($this->parameter2->get());
 
+                $this->delegate->unbound->once()->calledWith(true, false, true);
+
             });
 
         });
@@ -98,17 +61,16 @@ describe('BoundCallable', function () {
 
             it('should add false to the given vector and call the delegate ->unbound() method with the new vector', function () {
 
-                $this->delegate->unbound->with(true, false, false)->returns([
-                    $this->parameter1->get(),
-                ]);
-
                 $this->argument->isPlaceholder->returns(false);
 
                 $test = $this->callable->unbound(true, false);
 
                 expect($test)->toBeAn('array');
-                expect($test)->toHaveLength(1);
+                expect($test)->toHaveLength(2);
                 expect($test[0])->toBe($this->parameter1->get());
+                expect($test[1])->toBe($this->parameter2->get());
+
+                $this->delegate->unbound->once()->calledWith(true, false, false);
 
             });
 
@@ -118,15 +80,15 @@ describe('BoundCallable', function () {
 
     describe('->__invoke()', function () {
 
-        beforeEach(function () {
-
-            $this->delegate->expected->returns(2);
-
-        });
-
         context('when the argument is a placeholder', function () {
 
             beforeEach(function () {
+
+                $this->delegate->unbound->with(true)->returns([
+                    mock(ParameterInterface::class)->get(),
+                    mock(ParameterInterface::class)->get(),
+                    mock(ParameterInterface::class)->get(),
+                ]);
 
                 $this->argument->isPlaceholder->returns(true);
 
@@ -166,13 +128,9 @@ describe('BoundCallable', function () {
 
                 it('should throw an ArgumentCountError', function () {
 
-                    ArgumentCountErrorMessage::testing();
-
                     $test = function () { ($this->callable)('v1', 'v2'); };
 
-                    expect($test)->toThrow(new ArgumentCountError(
-                        (string) new ArgumentCountErrorMessage(3, 2)
-                    ));
+                    expect($test)->toThrow(new ArgumentCountError);
 
                 });
 
@@ -183,6 +141,11 @@ describe('BoundCallable', function () {
         context('when the argument is not a placeholder', function () {
 
             beforeEach(function () {
+
+                $this->delegate->unbound->with(false)->returns([
+                    mock(ParameterInterface::class)->get(),
+                    mock(ParameterInterface::class)->get(),
+                ]);
 
                 $this->argument->isPlaceholder->returns(false);
 
@@ -222,13 +185,9 @@ describe('BoundCallable', function () {
 
                 it('should throw an ArgumentCountError', function () {
 
-                    ArgumentCountErrorMessage::testing();
-
                     $test = function () { ($this->callable)('v1'); };
 
-                    expect($test)->toThrow(new ArgumentCountError(
-                        (string) new ArgumentCountErrorMessage(2, 1)
-                    ));
+                    expect($test)->toThrow(new ArgumentCountError);
 
                 });
 

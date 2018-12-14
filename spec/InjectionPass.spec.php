@@ -6,8 +6,8 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DI\InjectionPass;
 use Quanta\DI\BoundCallable;
-use Quanta\DI\InjectableCallableAdapter;
-use Quanta\DI\InjectableCallableInterface;
+use Quanta\DI\CallableAdapter;
+use Quanta\DI\BlueprintInterface;
 use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 use Quanta\DI\Parameters\ParameterInterface;
@@ -16,13 +16,16 @@ describe('InjectionPass', function () {
 
     beforeEach(function () {
 
-        $this->callable = mock(InjectableCallableInterface::class);
+        $this->callable = function () {};
+        $this->blueprint = mock(BlueprintInterface::class);
         $this->pool = mock(ArgumentPoolInterface::class);
 
         $this->pass = new InjectionPass(...[
-            $this->callable->get(),
+            $this->blueprint->get(),
             $this->pool->get(),
         ]);
+
+        $this->blueprint->callable->returns($this->callable);
 
     });
 
@@ -30,15 +33,15 @@ describe('InjectionPass', function () {
 
         describe('->injected()', function () {
 
-            it('should return a InjectableCallableAdapter from the injectable callable', function () {
+            it('should return a CallableAdapter from the injectable callable', function () {
 
                 $this->container = mock(ContainerInterface::class);
 
-                $this->callable->parameters->returns([]);
+                $this->blueprint->parameters->returns([]);
 
                 $test = $this->pass->injected($this->container->get());
 
-                $expected = new InjectableCallableAdapter($this->callable->get());
+                $expected = new CallableAdapter($this->callable);
 
                 expect($test)->toEqual($expected);
 
@@ -62,7 +65,7 @@ describe('InjectionPass', function () {
             $this->argument2 = mock(ArgumentInterface::class);
             $this->argument3 = mock(ArgumentInterface::class);
 
-            $this->callable->parameters->returns([
+            $this->blueprint->parameters->returns([
                 $this->parameter1->get(),
                 $this->parameter2->get(),
                 $this->parameter3->get(),
@@ -91,7 +94,11 @@ describe('InjectionPass', function () {
                 $expected = new BoundCallable(
                     new BoundCallable(
                         new BoundCallable(
-                            new InjectableCallableAdapter($this->callable->get()),
+                            new CallableAdapter($this->callable, ...[
+                                $this->parameter1->get(),
+                                $this->parameter2->get(),
+                                $this->parameter3->get(),
+                            ]),
                             $this->argument1->get()
                         ),
                         $this->argument2->get()

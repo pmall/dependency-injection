@@ -6,19 +6,20 @@ use Test\TestClass;
 use Test\TestClassWithoutParameter;
 use Test\TestClassWithoutConstructor;
 
-use Quanta\DI\SomeClass;
-use Quanta\DI\InjectableCallableInterface;
+use Quanta\DI\Instantiation;
+use Quanta\DI\InstanceBlueprint;
+use Quanta\DI\BlueprintInterface;
 use Quanta\DI\Parameters\ParameterInterface;
 
 require_once __DIR__ . '/test/classes.php';
 
-describe('SomeClass', function () {
+describe('InstanceBlueprint', function () {
 
-    it('should implement InjectableCallableInterface', function () {
+    it('should implement BlueprintInterface', function () {
 
-        $test = new SomeClass(TestClass::class);
+        $test = new InstanceBlueprint(TestClass::class);
 
-        expect($test)->toBeAnInstanceOf(InjectableCallableInterface::class);
+        expect($test)->toBeAnInstanceOf(BlueprintInterface::class);
 
     });
 
@@ -26,9 +27,9 @@ describe('SomeClass', function () {
 
         it('should return the name of the class', function () {
 
-            $class = new SomeClass(TestClass::class);
+            $blueprint = new InstanceBlueprint(TestClass::class);
 
-            $test = $class->name();
+            $test = $blueprint->name();
 
             expect($test)->toEqual(TestClass::class);
 
@@ -42,9 +43,9 @@ describe('SomeClass', function () {
 
             it('should return an empty array', function () {
 
-                $class = new SomeClass(TestClassWithoutConstructor::class);
+                $blueprint = new InstanceBlueprint(TestClassWithoutConstructor::class);
 
-                $test = $class->parameters();
+                $test = $blueprint->parameters();
 
                 expect($test)->toEqual([]);
 
@@ -58,9 +59,9 @@ describe('SomeClass', function () {
 
                 it('should return an empty array', function () {
 
-                    $class = new SomeClass(TestClassWithoutParameter::class);
+                    $blueprint = new InstanceBlueprint(TestClassWithoutParameter::class);
 
-                    $test = $class->parameters();
+                    $test = $blueprint->parameters();
 
                     expect($test)->toEqual([]);
 
@@ -72,9 +73,9 @@ describe('SomeClass', function () {
 
                 it('should return an array of the class constructor parameters', function () {
 
-                    $class = new SomeClass(TestClass::class);
+                    $blueprint = new InstanceBlueprint(TestClass::class);
 
-                    $test = $class->parameters();
+                    $test = $blueprint->parameters();
 
                     expect($test)->toBeAn('array');
                     expect($test)->toHaveLength(3);
@@ -97,11 +98,11 @@ describe('SomeClass', function () {
 
         it('should instantiate the class with the given arguments', function () {
 
-            $class = new SomeClass(TestClass::class);
+            $blueprint = new InstanceBlueprint(TestClass::class);
 
-            $test = $class('a', 'b', 'c');
+            $test = $blueprint->callable();
 
-            expect($test)->toEqual(new TestClass('a', 'b', 'c'));
+            expect($test)->toEqual(new Instantiation(TestClass::class));
 
         });
 

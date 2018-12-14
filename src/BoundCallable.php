@@ -3,7 +3,6 @@
 namespace Quanta\DI;
 
 use Quanta\DI\Arguments\ArgumentInterface;
-use Quanta\Exceptions\ArgumentCountErrorMessage;
 
 final class BoundCallable implements BoundCallableInterface
 {
@@ -36,14 +35,6 @@ final class BoundCallable implements BoundCallableInterface
     /**
      * @inheritdoc
      */
-    public function expected(): int
-    {
-        return $this->callable->expected() + $this->argument->isPlaceholder();
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function unbound(bool ...$vector): array
     {
         $vector[] = $this->argument->isPlaceholder();
@@ -56,19 +47,17 @@ final class BoundCallable implements BoundCallableInterface
      */
     public function __invoke(...$xs)
     {
-        // number of expected arguments === number of remaining placeholders.
-        $expected = $this->expected();
+        // number of expected arguments === number of unbound parameters.
+        $expected = count($this->unbound());
 
         // fail when there is less given arguments than expected.
-        if (count($xs) < $expected) {
-            throw new \ArgumentCountError(
-                (string) new ArgumentCountErrorMessage($expected, count($xs))
-            );
+        // inject the argument values into the given arguments.
+        if (count($xs) >= $expected) {
+            array_splice($xs, $expected, 0, $this->argument->values());
+
+            return ($this->callable)(...$xs);
         }
 
-        // inject the argument values into the given arguments.
-        array_splice($xs, $expected, 0, $this->argument->values());
-
-        return ($this->callable)(...$xs);
+        throw new \ArgumentCountError('Some parameters are not bound to arguments');
     }
 }

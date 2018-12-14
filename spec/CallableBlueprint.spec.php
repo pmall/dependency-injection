@@ -1,23 +1,22 @@
 <?php
 
-use function Eloquent\Phony\Kahlan\stub;
 use function Eloquent\Phony\Kahlan\mock;
 
 use Test\TestClass;
 
-use Quanta\DI\SomeCallable;
-use Quanta\DI\InjectableCallableInterface;
+use Quanta\DI\CallableBlueprint;
+use Quanta\DI\BlueprintInterface;
 use Quanta\DI\Parameters\ParameterInterface;
 
 require_once __DIR__ . '/test/classes.php';
 
-describe('SomeCallable', function () {
+describe('CallableBlueprint', function () {
 
-    it('should implement InjectableCallableInterface', function () {
+    it('should implement BlueprintInterface', function () {
 
-        $test = new SomeCallable(function () {});
+        $test = new CallableBlueprint(function () {});
 
-        expect($test)->toBeAnInstanceOf(InjectableCallableInterface::class);
+        expect($test)->toBeAnInstanceOf(BlueprintInterface::class);
 
     });
 
@@ -29,9 +28,9 @@ describe('SomeCallable', function () {
 
                 it('should return the callable parameters', function () {
 
-                    $callable = new SomeCallable(function ($a, $b, $c) {});
+                    $blueprint = new CallableBlueprint(function ($a, $b, $c) {});
 
-                    $test = $callable->parameters();
+                    $test = $blueprint->parameters();
 
                     expect($test)->toBeAn('array');
                     expect($test)->toHaveLength(3);
@@ -50,9 +49,9 @@ describe('SomeCallable', function () {
 
                 it('should return the callable parameters', function () {
 
-                    $callable = new SomeCallable(new TestClass);
+                    $blueprint = new CallableBlueprint(new TestClass);
 
-                    $test = $callable->parameters();
+                    $test = $blueprint->parameters();
 
                     expect($test)->toBeAn('array');
                     expect($test)->toHaveLength(3);
@@ -75,9 +74,9 @@ describe('SomeCallable', function () {
 
                 it('should return the callable parameters', function () {
 
-                    $callable = new SomeCallable([TestClass::class, 'createStatic']);
+                    $blueprint = new CallableBlueprint([TestClass::class, 'createStatic']);
 
-                    $test = $callable->parameters();
+                    $test = $blueprint->parameters();
 
                     expect($test)->toBeAn('array');
                     expect($test)->toHaveLength(3);
@@ -96,9 +95,9 @@ describe('SomeCallable', function () {
 
                 it('should return the callable parameters', function () {
 
-                    $callable = new SomeCallable([new TestClass, 'create']);
+                    $blueprint = new CallableBlueprint([new TestClass, 'create']);
 
-                    $test = $callable->parameters();
+                    $test = $blueprint->parameters();
 
                     expect($test)->toBeAn('array');
                     expect($test)->toHaveLength(3);
@@ -121,9 +120,9 @@ describe('SomeCallable', function () {
 
                 function some_callable ($a, $b, $c) {}
 
-                $callable = new SomeCallable('some_callable');
+                $blueprint = new CallableBlueprint('some_callable');
 
-                $test = $callable->parameters();
+                $test = $blueprint->parameters();
 
                 expect($test)->toBeAn('array');
                 expect($test)->toHaveLength(3);
@@ -140,19 +139,17 @@ describe('SomeCallable', function () {
 
     });
 
-    describe('->__invoke()', function () {
+    describe('->callable()', function () {
 
-        it('should invoke the callable with the given arguments', function () {
+        it('should return the callable', function () {
 
-            $delegate = stub();
+            $callable = function () {};
 
-            $delegate->with('a', 'b', 'c')->returns('value');
+            $blueprint = new CallableBlueprint($callable);
 
-            $callable = new SomeCallable($delegate);
+            $test = $blueprint->callable();
 
-            $test = $callable('a', 'b', 'c');
-
-            expect($test)->toEqual('value');
+            expect($test)->toEqual($callable);
 
         });
 
