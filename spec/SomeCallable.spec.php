@@ -1,22 +1,23 @@
 <?php
 
+use function Eloquent\Phony\Kahlan\stub;
 use function Eloquent\Phony\Kahlan\mock;
 
 use Test\TestClass;
 
 use Quanta\DI\SomeCallable;
+use Quanta\DI\InjectableCallableInterface;
 use Quanta\DI\Parameters\ParameterInterface;
-use Quanta\DI\Parameters\ParameterCollectionInterface;
 
 require_once __DIR__ . '/test/classes.php';
 
 describe('SomeCallable', function () {
 
-    it('should implement ParameterCollectionInterface', function () {
+    it('should implement InjectableCallableInterface', function () {
 
         $test = new SomeCallable(function () {});
 
-        expect($test)->toBeAnInstanceOf(ParameterCollectionInterface::class);
+        expect($test)->toBeAnInstanceOf(InjectableCallableInterface::class);
 
     });
 
@@ -134,6 +135,24 @@ describe('SomeCallable', function () {
                 expect($test[2]->name())->toEqual('c');
 
             });
+
+        });
+
+    });
+
+    describe('->__invoke()', function () {
+
+        it('should invoke the callable with the given arguments', function () {
+
+            $delegate = stub();
+
+            $delegate->with('a', 'b', 'c')->returns('value');
+
+            $callable = new SomeCallable($delegate);
+
+            $test = $callable('a', 'b', 'c');
+
+            expect($test)->toEqual('value');
 
         });
 

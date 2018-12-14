@@ -6,45 +6,41 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DI\InjectionPass;
 use Quanta\DI\BoundCallable;
-use Quanta\DI\CallableAdapter;
+use Quanta\DI\InjectableCallableAdapter;
+use Quanta\DI\InjectableCallableInterface;
 use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 use Quanta\DI\Parameters\ParameterInterface;
-use Quanta\DI\Parameters\ParameterCollectionInterface;
 
 describe('InjectionPass', function () {
 
     beforeEach(function () {
 
-        $this->callable = function () {};
+        $this->callable = mock(InjectableCallableInterface::class);
         $this->pool = mock(ArgumentPoolInterface::class);
-        $this->collection = mock(ParameterCollectionInterface::class);
 
         $this->pass = new InjectionPass(...[
-            $this->callable,
+            $this->callable->get(),
             $this->pool->get(),
-            $this->collection->get(),
         ]);
 
     });
 
-    context('when the parameter collection has no parameter', function () {
-
-        beforeEach(function () {
-
-            $this->container = mock(ContainerInterface::class);
-
-            $this->collection->parameters->returns([]);
-
-        });
+    context('when the injectable callable has no parameter', function () {
 
         describe('->injected()', function () {
 
-            it('should return a CallableAdapter from the callable', function () {
+            it('should return a InjectableCallableAdapter from the injectable callable', function () {
+
+                $this->container = mock(ContainerInterface::class);
+
+                $this->callable->parameters->returns([]);
 
                 $test = $this->pass->injected($this->container->get());
 
-                expect($test)->toEqual(new CallableAdapter($this->callable));
+                $expected = new InjectableCallableAdapter($this->callable->get());
+
+                expect($test)->toEqual($expected);
 
             });
 
@@ -52,7 +48,7 @@ describe('InjectionPass', function () {
 
     });
 
-    context('when there is at least one parameters', function () {
+    context('when the injectable callable has at least one parameter', function () {
 
         beforeEach(function () {
 
@@ -66,7 +62,7 @@ describe('InjectionPass', function () {
             $this->argument2 = mock(ArgumentInterface::class);
             $this->argument3 = mock(ArgumentInterface::class);
 
-            $this->collection->parameters->returns([
+            $this->callable->parameters->returns([
                 $this->parameter1->get(),
                 $this->parameter2->get(),
                 $this->parameter3->get(),
@@ -95,7 +91,7 @@ describe('InjectionPass', function () {
                 $expected = new BoundCallable(
                     new BoundCallable(
                         new BoundCallable(
-                            new CallableAdapter($this->callable),
+                            new InjectableCallableAdapter($this->callable->get()),
                             $this->argument1->get()
                         ),
                         $this->argument2->get()

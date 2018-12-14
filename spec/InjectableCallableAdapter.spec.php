@@ -1,19 +1,19 @@
 <?php
 
-use function Eloquent\Phony\Kahlan\stub;
 use function Eloquent\Phony\Kahlan\mock;
 
-use Quanta\DI\CallableAdapter;
 use Quanta\DI\BoundCallableInterface;
+use Quanta\DI\InjectableCallableAdapter;
+use Quanta\DI\InjectableCallableInterface;
 use Quanta\DI\Parameters\ParameterInterface;
 
-describe('CallableAdapter', function () {
+describe('InjectableCallableAdapter', function () {
 
     beforeEach(function () {
 
-        $this->callable = stub();
+        $this->callable = mock(InjectableCallableInterface::class);
 
-        $this->adapter = new CallableAdapter($this->callable);
+        $this->adapter = new InjectableCallableAdapter($this->callable->get());
 
     });
 
@@ -60,9 +60,9 @@ describe('CallableAdapter', function () {
 
         it('should invoke the callable with the given arguments', function () {
 
-            $this->callable->with('value1', 'value2', 'value3')->returns('value');
+            $this->callable->__invoke->with('a', 'b', 'c')->returns('value');
 
-            $test = ($this->adapter)('value1', 'value2', 'value3');
+            $test = ($this->adapter)('a', 'b', 'c');
 
             expect($test)->toEqual('value');
 

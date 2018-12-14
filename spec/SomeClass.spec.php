@@ -7,18 +7,18 @@ use Test\TestClassWithoutParameter;
 use Test\TestClassWithoutConstructor;
 
 use Quanta\DI\SomeClass;
+use Quanta\DI\InjectableCallableInterface;
 use Quanta\DI\Parameters\ParameterInterface;
-use Quanta\DI\Parameters\ParameterCollectionInterface;
 
 require_once __DIR__ . '/test/classes.php';
 
 describe('SomeClass', function () {
 
-    it('should implement ParameterCollectionInterface', function () {
+    it('should implement InjectableCallableInterface', function () {
 
         $test = new SomeClass(TestClass::class);
 
-        expect($test)->toBeAnInstanceOf(ParameterCollectionInterface::class);
+        expect($test)->toBeAnInstanceOf(InjectableCallableInterface::class);
 
     });
 
@@ -74,6 +74,20 @@ describe('SomeClass', function () {
                 });
 
             });
+
+        });
+
+    });
+
+    describe('->__invoke()', function () {
+
+        it('should instantiate the class with the given arguments', function () {
+
+            $class = new SomeClass(TestClass::class);
+
+            $test = $class('a', 'b', 'c');
+
+            expect($test)->toEqual(new TestClass('a', 'b', 'c'));
 
         });
 

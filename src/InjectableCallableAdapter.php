@@ -4,21 +4,21 @@ namespace Quanta\DI;
 
 use Quanta\DI\Parameters\ParameterInterface;
 
-final class CallableAdapter implements BoundCallableInterface
+final class InjectableCallableAdapter implements BoundCallableInterface
 {
     /**
      * The callable to invoke.
      *
-     * @var callable
+     * @var \Quanta\DI\InjectableCallableInterface
      */
     private $callable;
 
     /**
      * Constructor.
      *
-     * @param callable
+     * @param \Quanta\DI\InjectableCallableInterface $callable
      */
-    public function __construct(callable $callable)
+    public function __construct(InjectableCallableInterface $callable)
     {
         $this->callable = $callable;
     }

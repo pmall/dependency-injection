@@ -4,9 +4,8 @@ namespace Quanta\DI;
 
 use Quanta\DI\Parameters\ParameterInterface;
 use Quanta\DI\Parameters\ReflectionParameterAdapter;
-use Quanta\DI\Parameters\ParameterCollectionInterface;
 
-final class SomeClass implements ParameterCollectionInterface
+final class SomeClass implements InjectableCallableInterface
 {
     /**
      * The class name.
@@ -26,9 +25,7 @@ final class SomeClass implements ParameterCollectionInterface
     }
 
     /**
-     * Return the class constructor parameters.
-     *
-     * @return \Quanta\DI\Parameters\ParameterInterface[]
+     * @inheritdoc
      */
     public function parameters(): array
     {
@@ -39,6 +36,14 @@ final class SomeClass implements ParameterCollectionInterface
         return ! is_null($constructor)
             ? array_map([$this, 'parameter'], $constructor->getParameters())
             : [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __invoke(...$xs)
+    {
+        return new $this->class(...$xs);
     }
 
     /**

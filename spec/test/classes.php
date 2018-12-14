@@ -17,9 +17,15 @@ final class TestClassWithoutParameter
 
 final class TestClass
 {
+    private $a;
+    private $b;
+    private $c;
+
     public function __construct($a = null, $b = null, $c = null)
     {
-        //
+        $this->a = $a;
+        $this->b = $b;
+        $this->c = $c;
     }
 
     public static function createStatic($a = null, $b = null, $c = null)
