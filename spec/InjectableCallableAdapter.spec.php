@@ -37,20 +37,24 @@ describe('InjectableCallableAdapter', function () {
 
     describe('->unbound()', function () {
 
-        it('should return an array containing the given parameters', function () {
+        it('should return the intersection of the callable parameter and the true values of the given vector', function () {
 
             $parameter1 = mock(ParameterInterface::class);
             $parameter2 = mock(ParameterInterface::class);
+            $parameter3 = mock(ParameterInterface::class);
 
-            $test = $this->adapter->unbound(...[
+            $this->callable->parameters->returns([
                 $parameter1->get(),
                 $parameter2->get(),
+                $parameter3->get(),
             ]);
+
+            $test = $this->adapter->unbound(true, false, true);
 
             expect($test)->toBeAn('array');
             expect($test)->toHaveLength(2);
             expect($test[0])->toBe($parameter1->get());
-            expect($test[1])->toBe($parameter2->get());
+            expect($test[1])->toBe($parameter3->get());
 
         });
 

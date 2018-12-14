@@ -34,9 +34,13 @@ final class InjectableCallableAdapter implements BoundCallableInterface
     /**
      * @inheritdoc
      */
-    public function unbound(ParameterInterface ...$parameters): array
+    public function unbound(bool ...$vector): array
     {
-        return $parameters;
+        $parameters = $this->callable->parameters();
+
+        $unbound = array_intersect_key(array_values($parameters), array_filter($vector));
+
+        return array_values($unbound);
     }
 
     /**

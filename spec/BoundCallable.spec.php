@@ -67,28 +67,28 @@ describe('BoundCallable', function () {
 
         beforeEach(function () {
 
-            $this->p1 = mock(ParameterInterface::class);
-            $this->p2 = mock(ParameterInterface::class);
-            $this->p3 = mock(ParameterInterface::class);
-
-            $this->delegate->unbound->with($this->p1, $this->p2)->returns([
-                $this->p1->get(),
-            ]);
+            $this->parameter1 = mock(ParameterInterface::class);
+            $this->parameter2 = mock(ParameterInterface::class);
 
         });
 
         context('when the argument is a placeholder', function () {
 
-            it('should merge the last given parameter with the unbound parameters of the delegate', function () {
+            it('should add true to the given vector and call the delegate ->unbound() method with the new vector', function () {
+
+                $this->delegate->unbound->with(true, false, true)->returns([
+                    $this->parameter1->get(),
+                    $this->parameter2->get(),
+                ]);
 
                 $this->argument->isPlaceholder->returns(true);
 
-                $test = $this->callable->unbound($this->p1->get(), $this->p2->get(), $this->p3->get());
+                $test = $this->callable->unbound(true, false);
 
                 expect($test)->toBeAn('array');
                 expect($test)->toHaveLength(2);
-                expect($test[0])->toBe($this->p1->get());
-                expect($test[1])->toBe($this->p3->get());
+                expect($test[0])->toBe($this->parameter1->get());
+                expect($test[1])->toBe($this->parameter2->get());
 
             });
 
@@ -96,15 +96,19 @@ describe('BoundCallable', function () {
 
         context('when the argument is not a placeholder', function () {
 
-            it('should not merge the last given parameter with the unbound parameters of the delegate', function () {
+            it('should add false to the given vector and call the delegate ->unbound() method with the new vector', function () {
+
+                $this->delegate->unbound->with(true, false, false)->returns([
+                    $this->parameter1->get(),
+                ]);
 
                 $this->argument->isPlaceholder->returns(false);
 
-                $test = $this->callable->unbound($this->p1->get(), $this->p2->get(), $this->p3->get());
+                $test = $this->callable->unbound(true, false);
 
                 expect($test)->toBeAn('array');
                 expect($test)->toHaveLength(1);
-                expect($test[0])->toBe($this->p1->get());
+                expect($test[0])->toBe($this->parameter1->get());
 
             });
 
