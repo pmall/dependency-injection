@@ -108,8 +108,7 @@ describe('NameValueMap', function () {
 
                 $test = $this->pool->arguments($this->parameter->get());
 
-                expect($test)->toBeAn('array');
-                expect($test)->toHaveLength(0);
+                expect($test)->toEqual([]);
 
             });
 
