@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DI\Arguments\Pools;
+namespace Quanta\DI\Arguments;
 
 use Quanta\DI\Parameters\ParameterInterface;
 
@@ -32,9 +32,15 @@ final class ContainerErrorMessage
         $this->id = $id;
     }
 
+    /**
+     * Return the message of the exception thrown when the container fails to
+     * build an entry.
+     *
+     * @return string
+     */
     public function __toString()
     {
-        return vsprintf('Parameter $%s is bound to the failing container entry \'%s\'', [
+        return vsprintf('Parameter %s is bound to the failing container entry \'%s\'', [
             $this->parameter->name(),
             $this->id,
         ]);

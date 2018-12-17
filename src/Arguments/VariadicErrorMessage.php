@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DI\Arguments\Pools;
+namespace Quanta\DI\Arguments;
 
 use Quanta\DI\Parameters\ParameterInterface;
 
@@ -40,7 +40,7 @@ final class VariadicErrorMessage
      */
     public function __toString()
     {
-        return vsprintf('Parameter $%s is variadic and must therefore be associated with an array of values, %s given', [
+        return vsprintf('Parameter %s is variadic and must therefore be associated with an array of values, %s given', [
             $this->parameter->name(),
             gettype($this->value),
         ]);

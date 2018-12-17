@@ -1,10 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DI\Arguments\Pools;
+namespace Quanta\DI\Arguments;
 
-use Psr\Container\ContainerInterface;
-
-use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Parameters\ParameterInterface;
 
 abstract class AbstractArgumentPoolDecorator implements ArgumentPoolInterface
@@ -12,14 +9,14 @@ abstract class AbstractArgumentPoolDecorator implements ArgumentPoolInterface
     /**
      * The decorated argument pool.
      *
-     * @var \Quanta\DI\Arguments\Pools\ArgumentPoolInterface
+     * @var \Quanta\DI\Arguments\ArgumentPoolInterface
      */
     private $pool;
 
     /**
      * Construct.
      *
-     * @var \Quanta\DI\Arguments\Pools\ArgumentPoolInterface $pool
+     * @var \Quanta\DI\Arguments\ArgumentPoolInterface $pool
      */
     public function __construct(ArgumentPoolInterface $pool)
     {
@@ -29,8 +26,8 @@ abstract class AbstractArgumentPoolDecorator implements ArgumentPoolInterface
     /**
      * @inheritdoc
      */
-    public function argument(ContainerInterface $container, ParameterInterface $parameter): ArgumentInterface
+    public function arguments(ParameterInterface $parameter): array
     {
-        return $this->pool->argument($container, $parameter);
+        return $this->pool->arguments($parameter);
     }
 }

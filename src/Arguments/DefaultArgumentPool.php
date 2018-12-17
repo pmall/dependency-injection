@@ -1,32 +1,35 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DI\Arguments\Pools;
+namespace Quanta\DI\Arguments;
 
 use Psr\Container\ContainerInterface;
-
-use Quanta\DI\Arguments\ArgumentInterface;
-use Quanta\DI\Parameters\ParameterInterface;
 
 final class DefaultArgumentPool extends AbstractArgumentPoolDecorator
 {
     /**
      * Constructor.
      *
-     * @param array $options
+     * @param \Psr\Container\ContainerInterface $container
+     * @param array                             $options
      */
-    public function __construct(array $options = [])
+    public function __construct(ContainerInterface $container, array $options = [])
     {
         $aliases = array_filter($options, [$this, 'isAlias']);
 
         $aliases = array_map([$this, 'cleanUpAlias'], $aliases);
         $values = array_diff_key($options, $aliases);
 
+        $nameValueMap = array_filter($values, [$this, 'isParameterName'], ARRAY_FILTER_USE_KEY);
+        $nameAliasMap = array_filter($aliases, [$this, 'isParameterName'], ARRAY_FILTER_USE_KEY);
+        $typeHintValueMap = array_filter($values, [$this, 'isNotParameterName'], ARRAY_FILTER_USE_KEY);
+        $typeHintAliasMap = array_filter($aliases, [$this, 'isNotParameterName'], ARRAY_FILTER_USE_KEY);
+
         parent::__construct(new CompositeArgumentPool(...[
-            new NameValueMap(array_filter($values, [$this, 'isParameterName'], ARRAY_FILTER_USE_KEY)),
-            new NameAliasMap(array_filter($aliases, [$this, 'isParameterName'], ARRAY_FILTER_USE_KEY)),
-            new TypeHintValueMap(array_filter($values, [$this, 'isNotParameterName'], ARRAY_FILTER_USE_KEY)),
-            new TypeHintAliasMap(array_filter($aliases, [$this, 'isNotParameterName'], ARRAY_FILTER_USE_KEY)),
-            new FallbackArgumentPool,
+            new NameValueMap($nameValueMap),
+            new NameAliasMap($container, $nameAliasMap),
+            new TypeHintInstanceMap($typeHintValueMap),
+            new TypeHintAliasMap($container, $typeHintAliasMap),
+            new ContainerEntries($container),
         ]));
     }
 

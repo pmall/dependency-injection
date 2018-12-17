@@ -1,17 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Quanta\DI\Arguments\Pools;
+namespace Quanta\DI\Arguments;
 
 use Psr\Container\ContainerInterface;
 
-use Quanta\DI\Arguments\Argument;
-use Quanta\DI\Arguments\Placeholder;
-use Quanta\DI\Arguments\VariadicArgument;
-use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Parameters\ParameterInterface;
 
 final class TypeHintAliasMap implements ArgumentPoolInterface
 {
+    /**
+     * The container.
+     *
+     * @var \Psr\Container\ContainerInterface
+     */
+    private $container;
+
     /**
      * The class name to alias map.
      *
@@ -22,30 +25,32 @@ final class TypeHintAliasMap implements ArgumentPoolInterface
     /**
      * Constructor.
      *
-     * @param string[] $aliases
+     * @param \Psr\Container\ContainerInterface $container
+     * @param string[]                          $aliases
      */
-    public function __construct(array $aliases)
+    public function __construct(ContainerInterface $container, array $aliases)
     {
+        $this->container = $container;
         $this->aliases = $aliases;
     }
 
     /**
      * @inheritdoc
      */
-    public function argument(ContainerInterface $container, ParameterInterface $parameter): ArgumentInterface
+    public function arguments(ParameterInterface $parameter): array
     {
         if (! $parameter->hasClassTypeHint()) {
-            return new Placeholder;
+            return [];
         }
 
         $class = $parameter->typeHint();
 
         if (! key_exists($class, $this->aliases)) {
-            return new Placeholder;
+            return [];
         }
 
         try {
-            $value = $container->get($this->aliases[$class]);
+            $value = $this->container->get($this->aliases[$class]);
         }
         catch (\Throwable $e) {
             throw new \LogicException(
@@ -54,11 +59,11 @@ final class TypeHintAliasMap implements ArgumentPoolInterface
         }
 
         if (! $parameter->isVariadic()) {
-            return new Argument($value);
+            return [$value];
         }
 
         if (is_array($value)) {
-            return new VariadicArgument($value);
+            return $value;
         }
 
         throw new \LogicException(
