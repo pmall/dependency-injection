@@ -11,7 +11,7 @@ describe('ReflectionParameterAdapter', function () {
 
         $this->delegate = mock(ReflectionParameter::class);
 
-        $this->delegate->getName->returns('x');
+        $this->delegate->getName->returns('name');
 
         $this->parameter = new ReflectionParameterAdapter($this->delegate->get());
 
@@ -29,7 +29,7 @@ describe('ReflectionParameterAdapter', function () {
 
             $test = $this->parameter->name();
 
-            expect($test)->toEqual('x');
+            expect($test)->toEqual('$name');
 
         });
 

@@ -26,7 +26,7 @@ class ReflectionParameterAdapter implements ParameterInterface
      */
     public function name(): string
     {
-        return $this->reflection->getName();
+        return '$' . $this->reflection->getName();
     }
 
     /**

@@ -7,6 +7,8 @@ interface ParameterInterface
     /**
      * Return the parameter name.
      *
+     * It must be prepended with '$'.
+     *
      * @return string
      */
     public function name(): string;
