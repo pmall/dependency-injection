@@ -2,44 +2,59 @@
 
 namespace Quanta\DI;
 
-use Quanta\DI\Arguments\ArgumentInterface;
-
-final class BoundCallable implements BoundCallableInterface
+final class BoundCallable implements CallableInterface
 {
     /**
-     * The callable to execute.
+     * The callable to invoke.
      *
-     * @var \Quanta\DI\BoundCallableInterface
+     * @var \Quanta\DI\CallableInterface
      */
     private $callable;
 
     /**
-     * The argument to execute the callable with.
+     * The arguments bound to the first parameter.
      *
-     * @var \Quanta\DI\Arguments\ArgumentInterface
+     * @var array
      */
-    private $argument;
+    private $arguments;
 
     /**
      * Constructor.
      *
-     * @param \Quanta\DI\BoundCallableInterface        $callable
-     * @param \Quanta\DI\Arguments\ArgumentInterface   $argument
+     * At least one argument is required.
+     *
+     * @param \Quanta\DI\CallableInterface  $callable
+     * @param mixed                         $argument
+     * @param mixed                         ...$arguments
      */
-    public function __construct(BoundCallableInterface $callable, ArgumentInterface $argument)
+    public function __construct(CallableInterface $callable, $argument, ...$arguments)
     {
         $this->callable = $callable;
-        $this->argument = $argument;
+        $this->arguments = array_merge([$argument], $arguments);
     }
 
     /**
      * @inheritdoc
      */
-    public function unbound(bool ...$vector): array
+    public function parameters(): array
     {
-        $vector[] = $this->argument->isPlaceholder();
+        return $this->callable->parameters();
+    }
 
-        return $this->callable->unbound(...$vector);
+    /**
+     * @inheritdoc
+     */
+    public function required(): array
+    {
+        return $this->callable->required();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function optional(): array
+    {
+        return $this->callable->optional();
     }
 
     /**
@@ -47,17 +62,33 @@ final class BoundCallable implements BoundCallableInterface
      */
     public function __invoke(...$xs)
     {
-        // number of expected arguments === number of unbound parameters.
-        $expected = count($this->unbound());
+        $required = count($this->required());
 
-        // fail when there is less given arguments than expected.
-        // inject the argument values into the given arguments.
-        if (count($xs) >= $expected) {
-            array_splice($xs, $expected, 0, $this->argument->values());
+        if (count($xs) >= $required) {
+            array_splice($xs, $required, 0, $this->arguments);
 
             return ($this->callable)(...$xs);
         }
 
         throw new \ArgumentCountError('Some parameters are not bound to arguments');
+    }
+
+    /**
+     * Return the default value of the given parameter.
+     *
+     * @param \Quanta\Parameters\ParameterInterface $parameter
+     * @return array
+     */
+    private function defaults(ParameterInterface $parameter): array
+    {
+        if ($parameter->hasDefaultValue()) {
+            return [$parameter->defaultValue()];
+        }
+
+        if ($parameter->allowsNull()) {
+            return [null];
+        }
+
+        return [];
     }
 }

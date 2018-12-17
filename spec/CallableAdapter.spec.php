@@ -1,45 +1,57 @@
 <?php
 
 use function Eloquent\Phony\Kahlan\stub;
-use function Eloquent\Phony\Kahlan\mock;
 
 use Quanta\DI\CallableAdapter;
-use Quanta\DI\BoundCallableInterface;
-use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\CallableInterface;
 
 describe('CallableAdapter', function () {
 
     beforeEach(function () {
 
         $this->callable = stub();
-        $this->parameter1 = mock(ParameterInterface::class);
-        $this->parameter2 = mock(ParameterInterface::class);
-        $this->parameter3 = mock(ParameterInterface::class);
 
-        $this->adapter = new CallableAdapter($this->callable, ...[
-            $this->parameter1->get(),
-            $this->parameter2->get(),
-            $this->parameter3->get(),
-        ]);
+        $this->adapter = new CallableAdapter($this->callable);
 
     });
 
-    it('should implement BoundCallableInterface', function () {
+    it('should implement CallableInterface', function () {
 
-        expect($this->adapter)->toBeAnInstanceOf(BoundCallableInterface::class);
+        expect($this->adapter)->toBeAnInstanceOf(CallableInterface::class);
 
     });
 
-    describe('->unbound()', function () {
+    describe('->parameters()', function () {
 
-        it('should return the parameters at the position of the true values of the given vector', function () {
+        it('should return an empty array', function () {
 
-            $test = $this->adapter->unbound(true, false, true);
+            $test = $this->adapter->parameters();
 
-            expect($test)->toBeAn('array');
-            expect($test)->toHaveLength(2);
-            expect($test[0])->toBe($this->parameter1->get());
-            expect($test[1])->toBe($this->parameter3->get());
+            expect($test)->toEqual([]);
+
+        });
+
+    });
+
+    describe('->required()', function () {
+
+        it('should return an empty array', function () {
+
+            $test = $this->adapter->required();
+
+            expect($test)->toEqual([]);
+
+        });
+
+    });
+
+    describe('->optional()', function () {
+
+        it('should return an empty array', function () {
+
+            $test = $this->adapter->optional();
+
+            expect($test)->toEqual([]);
 
         });
 

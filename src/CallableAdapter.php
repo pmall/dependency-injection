@@ -2,9 +2,7 @@
 
 namespace Quanta\DI;
 
-use Quanta\DI\Parameters\ParameterInterface;
-
-final class CallableAdapter implements BoundCallableInterface
+final class CallableAdapter implements CallableInterface
 {
     /**
      * The callable to invoke.
@@ -14,32 +12,37 @@ final class CallableAdapter implements BoundCallableInterface
     private $callable;
 
     /**
-     * The callable parameters.
-     *
-     * @var \Quanta\DI\Parameters\ParameterInterface[]
-     */
-    private $parameters;
-
-    /**
      * Constructor.
      *
-     * @param callable                                  $callable
-     * @param \Quanta\DI\Parameters\ParameterInterface  ...$parameters
+     * @param callable $callable
      */
-    public function __construct(callable $callable, ParameterInterface ...$parameters)
+    public function __construct(callable $callable)
     {
         $this->callable = $callable;
-        $this->parameters = $parameters;
     }
 
     /**
      * @inheritdoc
      */
-    public function unbound(bool ...$vector): array
+    public function parameters(): array
     {
-        $unbound = array_intersect_key($this->parameters, array_filter($vector));
+        return [];
+    }
 
-        return array_values($unbound);
+    /**
+     * @inheritdoc
+     */
+    public function required(): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function optional(): array
+    {
+        return [];
     }
 
     /**
