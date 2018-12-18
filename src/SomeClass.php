@@ -38,6 +38,16 @@ final class SomeClass
     }
 
     /**
+     * Return the class name.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->class;
+    }
+
+    /**
      * Bind the given callable to arguments provided by the given argument pool.
      *
      * @param callable                                      $callable
