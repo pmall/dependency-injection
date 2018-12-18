@@ -2,36 +2,25 @@
 
 namespace Quanta\DI;
 
-use Psr\Container\ContainerInterface;
-
+use Quanta\DI\Arguments\ArgumentPoolInterface;
 use Quanta\DI\Parameters\ParameterInterface;
-use Quanta\DI\Arguments\Pools\ArgumentPoolInterface;
 
 final class BindCallable
 {
     /**
-     * The container.
-     *
-     * @var \Psr\Container\ContainerInterface
-     */
-    private $container;
-
-    /**
      * The argument pool.
      *
-     * @var \Quanta\DI\Arguments\Pools\ArgumentPoolInterface
+     * @var \Quanta\DI\Arguments\ArgumentPoolInterface
      */
     private $pool;
 
     /**
      * Constructor.
      *
-     * @param \Psr\Container\ContainerInterface                 $container
-     * @param \Quanta\DI\Arguments\Pools\ArgumentPoolInterface  $pool
+     * @param \Quanta\DI\Arguments\ArgumentPoolInterface $pool
      */
-    public function __construct(ContainerInterface $container, ArgumentPoolInterface $pool)
+    public function __construct(ArgumentPoolInterface $pool)
     {
-        $this->container = $container;
         $this->pool = $pool;
     }
 
@@ -39,14 +28,16 @@ final class BindCallable
      * Bind the given callable to the argument provided by the argument pool for
      * the given parameter.
      *
-     * @param \Quanta\DI\BoundCallableInterface        $callable
-     * @param \Quanta\DI\Parameters\ParameterInterface $parameter
-     * @return \Quanta\DI\BoundCallableInterface
+     * @param \Quanta\DI\CallableInterface              $callable
+     * @param \Quanta\DI\Parameters\ParameterInterface  $parameter
+     * @return \Quanta\DI\CallableInterface
      */
-    public function __invoke(BoundCallableInterface $callable, ParameterInterface $parameter): BoundCallableInterface
+    public function __invoke(CallableInterface $callable, ParameterInterface $parameter): CallableInterface
     {
-        $argument = $this->pool->argument($this->container, $parameter);
+        $arguments = $this->pool->arguments($parameter);
 
-        return new BoundCallable($callable, $argument);
+        return count($arguments) > 0
+            ? new BoundCallable($callable, ...$arguments)
+            : new UnboundCallable($callable, $parameter);
     }
 }
