@@ -30,6 +30,7 @@ final class DefaultArgumentPool extends AbstractArgumentPoolDecorator
             new TypeHintInstanceMap($typeHintValueMap),
             new TypeHintAliasMap($container, $typeHintAliasMap),
             new ContainerEntries($container),
+            new NullValue,
         ]));
     }
 

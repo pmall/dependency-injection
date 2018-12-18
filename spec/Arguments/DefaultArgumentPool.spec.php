@@ -510,9 +510,139 @@ describe('DefaultArgumentPool', function () {
 
                     context('when the container does not have an entry for the parameter class name', function () {
 
-                        it('should return an empty array', function () {
+                        beforeEach(function () {
 
                             $this->container->has->with(SomeClass3::class)->returns(false);
+
+                        });
+
+                        context('when the parameter allows null', function () {
+
+                            beforeEach(function () {
+
+                                $this->parameter->allowsNull->returns(true);
+
+                            });
+
+                            context('when the parameter has no default value and is not variadic', function () {
+
+                                it('should return an array containing null', function () {
+
+                                    $this->parameter->hasDefaultValue->returns(false);
+                                    $this->parameter->isVariadic->returns(false);
+
+                                    $test = $this->pool->arguments($this->parameter->get());
+
+                                    expect($test)->toBeAn('array');
+                                    expect($test)->toHaveLength(1);
+                                    expect($test[0])->toEqual(null);
+
+                                });
+
+                            });
+
+                            context('when the parameter has a default value', function () {
+
+                                it('should return an empty array', function () {
+
+                                    $this->parameter->hasDefaultValue->returns(true);
+
+                                    $test = $this->pool->arguments($this->parameter->get());
+
+                                    expect($test)->toEqual([]);
+
+                                });
+
+                            });
+
+                            context('when the parameter is variadic', function () {
+
+                                it('should return an empty array', function () {
+
+                                    $this->parameter->isVariadic->returns(true);
+
+                                    $test = $this->pool->arguments($this->parameter->get());
+
+                                    expect($test)->toEqual([]);
+
+                                });
+
+                            });
+
+                        });
+
+                        context('when the parameter does not allow null', function () {
+
+                            it('should return an empty array', function () {
+
+                                $this->parameter->allowsNull->returns(false);
+
+                                $test = $this->pool->arguments($this->parameter->get());
+
+                                expect($test)->toEqual([]);
+
+                            });
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+            context('when the parameter does not have a class name', function () {
+
+                beforeEach(function () {
+
+                    $this->parameter->hasClassTypeHint->returns(false);
+
+                });
+
+                context('when the parameter allows null', function () {
+
+                    beforeEach(function () {
+
+                        $this->parameter->allowsNull->returns(true);
+
+                    });
+
+                    context('when the parameter has no default value and is not variadic', function () {
+
+                        it('should return an array containing null', function () {
+
+                            $this->parameter->hasDefaultValue->returns(false);
+                            $this->parameter->isVariadic->returns(false);
+
+                            $test = $this->pool->arguments($this->parameter->get());
+
+                            expect($test)->toBeAn('array');
+                            expect($test)->toHaveLength(1);
+                            expect($test[0])->toEqual(null);
+
+                        });
+
+                    });
+
+                    context('when the parameter has a default value', function () {
+
+                        it('should return an empty array', function () {
+
+                            $this->parameter->hasDefaultValue->returns(true);
+
+                            $test = $this->pool->arguments($this->parameter->get());
+
+                            expect($test)->toEqual([]);
+
+                        });
+
+                    });
+
+                    context('when the parameter is variadic', function () {
+
+                        it('should return an empty array', function () {
+
+                            $this->parameter->isVariadic->returns(true);
 
                             $test = $this->pool->arguments($this->parameter->get());
 
@@ -524,17 +654,17 @@ describe('DefaultArgumentPool', function () {
 
                 });
 
-            });
+                context('when the parameter does not allow null', function () {
 
-            context('when the container does not have a class name', function () {
+                    it('should return an empty array', function () {
 
-                it('should return an empty array', function () {
+                        $this->parameter->allowsNull->returns(false);
 
-                    $this->parameter->hasClassTypeHint->returns(false);
+                        $test = $this->pool->arguments($this->parameter->get());
 
-                    $test = $this->pool->arguments($this->parameter->get());
+                        expect($test)->toEqual([]);
 
-                    expect($test)->toEqual([]);
+                    });
 
                 });
 
