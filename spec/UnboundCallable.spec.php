@@ -309,7 +309,7 @@ describe('UnboundCallable', function () {
 
             context('when the parameter has a default value', function () {
 
-                it('should invoke the delegate with the given arguments, the default values of the optional parameters and the default value of this parameter', function () {
+                it('should complete the given arguments with the default values of the delegate optional parameters and the default value of this parameter', function () {
 
                     $this->parameter->hasDefaultValue->returns(true);
                     $this->parameter->allowsNull->returns(false);
@@ -329,7 +329,7 @@ describe('UnboundCallable', function () {
 
             context('when the parameter is nullable', function () {
 
-                it('should invoke the delegate with the given arguments, the default values of the optional parameters and null', function () {
+                it('should complete the given arguments with the default values of the delegate optional parameters and null', function () {
 
                     $this->parameter->hasDefaultValue->returns(false);
                     $this->parameter->allowsNull->returns(true);
@@ -347,7 +347,7 @@ describe('UnboundCallable', function () {
 
             context('when the parameter is variadic', function () {
 
-                it('should invoke the delegate with the given arguments and the default values of the optional parameters', function () {
+                it('should complete the given arguments with the default values of the delegate optional parameters', function () {
 
                     $this->parameter->hasDefaultValue->returns(false);
                     $this->parameter->allowsNull->returns(false);
@@ -371,7 +371,7 @@ describe('UnboundCallable', function () {
 
                 context('when the parameter has a default value', function () {
 
-                    it('should invoke the delegate with the given arguments, the default values of the optional parameters with no argument and the default value of this parameter', function () {
+                    it('should complete the given arguments with the default values of the delegate optional parameters with no argument and the default value of this parameter', function () {
 
                         $this->parameter->hasDefaultValue->returns(true);
                         $this->parameter->allowsNull->returns(false);
@@ -391,7 +391,7 @@ describe('UnboundCallable', function () {
 
                 context('when the parameter is nullable', function () {
 
-                    it('should invoke the delegate with the given arguments, the default values of the optional parameters with no argument and null', function () {
+                    it('should complete the given arguments with the default values of the delegate optional parameters with no argument and null', function () {
 
                         $this->parameter->hasDefaultValue->returns(false);
                         $this->parameter->allowsNull->returns(true);
@@ -409,7 +409,7 @@ describe('UnboundCallable', function () {
 
                 context('when the parameter is variadic', function () {
 
-                    it('should invoke the delegate with the given arguments and the default values of the optional parameters with no argument', function () {
+                    it('should complete the given arguments with the default values of the delegate optional parameters with no argument', function () {
 
                         $this->parameter->hasDefaultValue->returns(false);
                         $this->parameter->allowsNull->returns(false);

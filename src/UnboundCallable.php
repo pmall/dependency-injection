@@ -97,7 +97,7 @@ final class UnboundCallable implements CallableInterface
     }
 
     /**
-     * Return whether a value can be inferred from the parameter.
+     * Return whether a default value can be inferred from the parameter.
      *
      * @return bool
      */
