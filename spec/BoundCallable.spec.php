@@ -4,6 +4,7 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Quanta\DI\BoundCallable;
 use Quanta\DI\CallableInterface;
+use Quanta\DI\BindingErrorMessage;
 use Quanta\DI\Parameters\ParameterInterface;
 
 describe('BoundCallable', function () {
@@ -30,7 +31,7 @@ describe('BoundCallable', function () {
 
         beforeEach(function () {
 
-            $this->callable = new BoundCallable($this->delegate->get(), 'e', 'f');
+            $this->callable = new BoundCallable($this->delegate->get(), 'f', 'g');
 
         });
 
@@ -122,28 +123,31 @@ describe('BoundCallable', function () {
 
             beforeEach(function () {
 
-                $parameter1 = mock(ParameterInterface::class);
-                $parameter2 = mock(ParameterInterface::class);
-                $parameter3 = mock(ParameterInterface::class);
-                $parameter4 = mock(ParameterInterface::class);
+                $this->parameter1 = mock(ParameterInterface::class);
+                $this->parameter2 = mock(ParameterInterface::class);
+                $this->parameter3 = mock(ParameterInterface::class);
+                $this->parameter4 = mock(ParameterInterface::class);
+                $this->parameter5 = mock(ParameterInterface::class);
 
                 $this->delegate->parameters->returns([
-                    $parameter1->get(),
-                    $parameter2->get(),
-                    $parameter3->get(),
-                    $parameter4->get(),
+                    $this->parameter1->get(),
+                    $this->parameter2->get(),
+                    $this->parameter3->get(),
+                    $this->parameter4->get(),
+                    $this->parameter5->get(),
                 ]);
 
                 $this->delegate->required->returns([
-                    $parameter1->get(),
-                    $parameter2->get(),
+                    $this->parameter1->get(),
+                    $this->parameter2->get(),
+                    $this->parameter3->get(),
                 ]);
 
-                $parameter3->hasDefaultValue->returns(true);
-                $parameter3->defaultValue->returns('default1');
+                $this->parameter4->hasDefaultValue->returns(true);
+                $this->parameter4->defaultValue->returns('default1');
 
-                $parameter4->hasDefaultValue->returns(true);
-                $parameter4->defaultValue->returns('default2');
+                $this->parameter5->hasDefaultValue->returns(true);
+                $this->parameter5->defaultValue->returns('default2');
 
             });
 
@@ -153,7 +157,11 @@ describe('BoundCallable', function () {
 
                     $test = function () { ($this->callable)('a'); };
 
-                    expect($test)->toThrow(new ArgumentCountError);
+                    expect($test)->toThrow(new ArgumentCountError(
+                        (string) new BindingErrorMessage(
+                            'injected callable', $this->parameter2->get(), $this->parameter3->get()
+                        )
+                    ));
 
                 });
 
@@ -166,10 +174,10 @@ describe('BoundCallable', function () {
                     it('should complete the given arguments with the default values of the delegate optional parameters and this callable arguments', function () {
 
                         $this->delegate->__invoke
-                            ->with('a', 'b', 'default1', 'default2', 'e', 'f')
+                            ->with('a', 'b', 'c', 'default1', 'default2', 'f', 'g')
                             ->returns('value');
 
-                        $test = ($this->callable)('a', 'b');
+                        $test = ($this->callable)('a', 'b', 'c');
 
                         expect($test)->toEqual('value');
 
@@ -182,10 +190,10 @@ describe('BoundCallable', function () {
                     it('should append this callable arguments to the given arguments', function () {
 
                         $this->delegate->__invoke
-                            ->with('a', 'b', 'c', 'd', 'e', 'f')
+                            ->with('a', 'b', 'c', 'd', 'e', 'f', 'g')
                             ->returns('value');
 
-                        $test = ($this->callable)('a', 'b', 'c', 'd');
+                        $test = ($this->callable)('a', 'b', 'c', 'd', 'e');
 
                         expect($test)->toEqual('value');
 
@@ -198,10 +206,10 @@ describe('BoundCallable', function () {
                     it('should inject this callable arguments inside the given arguments', function () {
 
                         $this->delegate->__invoke
-                            ->with('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+                            ->with('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i')
                             ->returns('value');
 
-                        $test = ($this->callable)('a', 'b', 'c', 'd', 'g', 'h');
+                        $test = ($this->callable)('a', 'b', 'c', 'd','e', 'h', 'i');
 
                         expect($test)->toEqual('value');
 

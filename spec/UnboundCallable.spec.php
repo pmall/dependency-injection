@@ -4,6 +4,7 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Quanta\DI\UnboundCallable;
 use Quanta\DI\CallableInterface;
+use Quanta\DI\BindingErrorMessage;
 use Quanta\DI\Parameters\ParameterInterface;
 
 describe('UnboundCallable', function () {
@@ -211,19 +212,22 @@ describe('UnboundCallable', function () {
 
         beforeEach(function () {
 
-            $parameter1 = mock(ParameterInterface::class);
-            $parameter2 = mock(ParameterInterface::class);
-            $parameter3 = mock(ParameterInterface::class);
+            $this->parameter1 = mock(ParameterInterface::class);
+            $this->parameter2 = mock(ParameterInterface::class);
+            $this->parameter3 = mock(ParameterInterface::class);
+            $this->parameter4 = mock(ParameterInterface::class);
 
             $this->delegate->parameters->returns([
-                $parameter1->get(),
-                $parameter2->get(),
-                $parameter3->get(),
+                $this->parameter1->get(),
+                $this->parameter2->get(),
+                $this->parameter3->get(),
+                $this->parameter4->get(),
             ]);
 
             $this->delegate->required->returns([
-                $parameter1->get(),
-                $parameter2->get(),
+                $this->parameter1->get(),
+                $this->parameter2->get(),
+                $this->parameter3->get(),
             ]);
 
         });
@@ -233,7 +237,6 @@ describe('UnboundCallable', function () {
             beforeEach(function () {
 
                 $this->parameter->hasDefaultValue->returns(true);
-                $this->parameter->defaultValue->returns('a');
 
             });
 
@@ -243,7 +246,11 @@ describe('UnboundCallable', function () {
 
                     $test = function () { ($this->callable)('a'); };
 
-                    expect($test)->toThrow(new ArgumentCountError);
+                    expect($test)->toThrow(new ArgumentCountError(
+                        (string) new BindingErrorMessage(
+                            'injected callable', $this->parameter2->get(), $this->parameter3->get()
+                        )
+                    ));
 
                 });
 
@@ -253,9 +260,11 @@ describe('UnboundCallable', function () {
 
                 it('should invoke the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('a', 'b')->returns('value');
+                    $this->delegate->__invoke
+                        ->with('a', 'b', 'c')
+                        ->returns('value');
 
-                    $test = ($this->callable)('a', 'b');
+                    $test = ($this->callable)('a', 'b', 'c');
 
                     expect($test)->toEqual('value');
 
@@ -267,9 +276,11 @@ describe('UnboundCallable', function () {
 
                 it('should invoke the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('a', 'b', 'c', 'd')->returns('value');
+                    $this->delegate->__invoke
+                        ->with('a', 'b', 'c', 'd', 'e')
+                        ->returns('value');
 
-                    $test = ($this->callable)('a', 'b', 'c', 'd');
+                    $test = ($this->callable)('a', 'b', 'c', 'd', 'e');
 
                     expect($test)->toEqual('value');
 
@@ -293,7 +304,11 @@ describe('UnboundCallable', function () {
 
                     $test = function () { ($this->callable)('a'); };
 
-                    expect($test)->toThrow(new ArgumentCountError);
+                    expect($test)->toThrow(new ArgumentCountError(
+                        (string) new BindingErrorMessage(
+                            'injected callable', $this->parameter2->get(), $this->parameter3->get()
+                        )
+                    ));
 
                 });
 
@@ -303,9 +318,11 @@ describe('UnboundCallable', function () {
 
                 it('should invoke the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('a', 'b')->returns('value');
+                    $this->delegate->__invoke
+                        ->with('a', 'b', 'c')
+                        ->returns('value');
 
-                    $test = ($this->callable)('a', 'b');
+                    $test = ($this->callable)('a', 'b', 'c');
 
                     expect($test)->toEqual('value');
 
@@ -317,9 +334,11 @@ describe('UnboundCallable', function () {
 
                 it('should invoke the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('a', 'b', 'c', 'd')->returns('value');
+                    $this->delegate->__invoke
+                        ->with('a', 'b', 'c', 'd', 'e')
+                        ->returns('value');
 
-                    $test = ($this->callable)('a', 'b', 'c', 'd');
+                    $test = ($this->callable)('a', 'b', 'c', 'd', 'e');
 
                     expect($test)->toEqual('value');
 
@@ -342,9 +361,17 @@ describe('UnboundCallable', function () {
 
                 it('should throw an ArgumentCountError', function () {
 
-                    $test = function () { ($this->callable)('a', 'b', 'c'); };
+                    $test = function () { ($this->callable)('a', 'b'); };
 
-                    expect($test)->toThrow(new ArgumentCountError);
+                    expect($test)->toThrow(new ArgumentCountError(
+                        (string) new BindingErrorMessage(
+                            'injected callable', ...[
+                                $this->parameter3->get(),
+                                $this->parameter4->get(),
+                                $this->parameter->get()
+                            ]
+                        )
+                    ));
 
                 });
 
@@ -354,9 +381,11 @@ describe('UnboundCallable', function () {
 
                 it('should invoke the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('a', 'b', 'c', 'd')->returns('value');
+                    $this->delegate->__invoke
+                        ->with('a', 'b', 'c', 'd', 'e')
+                        ->returns('value');
 
-                    $test = ($this->callable)('a', 'b', 'c', 'd');
+                    $test = ($this->callable)('a', 'b', 'c', 'd', 'e');
 
                     expect($test)->toEqual('value');
 
@@ -368,9 +397,11 @@ describe('UnboundCallable', function () {
 
                 it('should invoke the delegate with the given arguments', function () {
 
-                    $this->delegate->__invoke->with('a', 'b', 'c', 'd', 'e', 'f')->returns('value');
+                    $this->delegate->__invoke
+                        ->with('a', 'b', 'c', 'd', 'e', 'f', 'g')
+                        ->returns('value');
 
-                    $test = ($this->callable)('a', 'b', 'c', 'd', 'e', 'f');
+                    $test = ($this->callable)('a', 'b', 'c', 'd', 'e', 'f', 'g');
 
                     expect($test)->toEqual('value');
 

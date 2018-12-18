@@ -62,7 +62,9 @@ final class BoundCallable implements CallableInterface
      */
     public function __invoke(...$xs)
     {
-        if (count($xs) >= count($this->required())) {
+        $required = $this->required();
+
+        if (count($xs) >= count($required)) {
             $parameters = $this->parameters();
 
             for ($i = count($xs); $i < count($parameters); $i++) {
@@ -80,6 +82,10 @@ final class BoundCallable implements CallableInterface
             return ($this->callable)(...$xs);
         }
 
-        throw new \ArgumentCountError('Some parameters are not bound to arguments');
+        throw new \ArgumentCountError(
+            (string) new BindingErrorMessage(
+                'injected callable', ...array_slice($required, count($xs))
+            )
+        );
     }
 }

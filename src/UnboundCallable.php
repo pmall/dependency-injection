@@ -73,11 +73,17 @@ final class UnboundCallable implements CallableInterface
      */
     public function __invoke(...$xs)
     {
-        if (count($xs) >= count($this->required())) {
+        $required = $this->required();
+
+        if (count($xs) >= count($required)) {
             return ($this->callable)(...$xs);
         }
 
-        throw new \ArgumentCountError('Some parameters are not bound to arguments');
+        throw new \ArgumentCountError(
+            (string) new BindingErrorMessage(
+                'injected callable', ...array_slice($required, count($xs))
+            )
+        );
     }
 
     /**
