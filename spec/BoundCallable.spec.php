@@ -30,7 +30,7 @@ describe('BoundCallable', function () {
 
         beforeEach(function () {
 
-            $this->callable = new BoundCallable($this->delegate->get(), 'd', 'e');
+            $this->callable = new BoundCallable($this->delegate->get(), 'e', 'f');
 
         });
 
@@ -125,12 +125,25 @@ describe('BoundCallable', function () {
                 $parameter1 = mock(ParameterInterface::class);
                 $parameter2 = mock(ParameterInterface::class);
                 $parameter3 = mock(ParameterInterface::class);
+                $parameter4 = mock(ParameterInterface::class);
+
+                $this->delegate->parameters->returns([
+                    $parameter1->get(),
+                    $parameter2->get(),
+                    $parameter3->get(),
+                    $parameter4->get(),
+                ]);
 
                 $this->delegate->required->returns([
                     $parameter1->get(),
                     $parameter2->get(),
-                    $parameter3->get(),
                 ]);
+
+                $parameter3->hasDefaultValue->returns(true);
+                $parameter3->defaultValue->returns('default1');
+
+                $parameter4->hasDefaultValue->returns(true);
+                $parameter4->defaultValue->returns('default2');
 
             });
 
@@ -138,7 +151,7 @@ describe('BoundCallable', function () {
 
                 it('should throw an ArgumentCountError', function () {
 
-                    $test = function () { ($this->callable)('a', 'b'); };
+                    $test = function () { ($this->callable)('a'); };
 
                     expect($test)->toThrow(new ArgumentCountError);
 
@@ -146,29 +159,53 @@ describe('BoundCallable', function () {
 
             });
 
-            context('when as many arguments as the delegate number of required parameters is given', function () {
+            context('when at least as many arguments as the delegate number of required parameters is given', function () {
 
-                it('should invoke the delegate with the given arguments and the bound arguments', function () {
+                context('when less arguments than the delegate number of parameters is given', function () {
 
-                    $this->delegate->__invoke->with('a', 'b', 'c', 'd', 'e')->returns('value');
+                    it('should complete the given arguments with the default values of the delegate optional parameters and this callable arguments', function () {
 
-                    $test = ($this->callable)('a', 'b', 'c');
+                        $this->delegate->__invoke
+                            ->with('a', 'b', 'default1', 'default2', 'e', 'f')
+                            ->returns('value');
 
-                    expect($test)->toEqual('value');
+                        $test = ($this->callable)('a', 'b');
+
+                        expect($test)->toEqual('value');
+
+                    });
 
                 });
 
-            });
+                context('when as many arguments as the delegate number of parameters is given', function () {
 
-            context('when more arguments than the delegate number of required parameters is given', function () {
+                    it('should append this callable arguments to the given arguments', function () {
 
-                it('should invoke the delegate with the given arguments, the bound arguments and the extra arguments', function () {
+                        $this->delegate->__invoke
+                            ->with('a', 'b', 'c', 'd', 'e', 'f')
+                            ->returns('value');
 
-                    $this->delegate->__invoke->with('a', 'b', 'c', 'd', 'e', 'f', 'g')->returns('value');
+                        $test = ($this->callable)('a', 'b', 'c', 'd');
 
-                    $test = ($this->callable)('a', 'b', 'c', 'f', 'g');
+                        expect($test)->toEqual('value');
 
-                    expect($test)->toEqual('value');
+                    });
+
+                });
+
+                context('when more arguments than the delegate number of parameters is given', function () {
+
+                    it('should inject this callable arguments inside the given arguments', function () {
+
+                        $this->delegate->__invoke
+                            ->with('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+                            ->returns('value');
+
+                        $test = ($this->callable)('a', 'b', 'c', 'd', 'g', 'h');
+
+                        expect($test)->toEqual('value');
+
+                    });
 
                 });
 

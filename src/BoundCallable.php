@@ -62,33 +62,24 @@ final class BoundCallable implements CallableInterface
      */
     public function __invoke(...$xs)
     {
-        $required = count($this->required());
+        if (count($xs) >= count($this->required())) {
+            $parameters = $this->parameters();
 
-        if (count($xs) >= $required) {
-            array_splice($xs, $required, 0, $this->arguments);
+            for ($i = count($xs); $i < count($parameters); $i++) {
+                $arguments = [];
+
+                if ($parameters[$i]->hasDefaultValue()) {
+                    $arguments = [$parameters[$i]->defaultValue()];
+                }
+
+                $xs = array_merge($xs, $arguments);
+            }
+
+            array_splice($xs, count($parameters), 0, $this->arguments);
 
             return ($this->callable)(...$xs);
         }
 
         throw new \ArgumentCountError('Some parameters are not bound to arguments');
-    }
-
-    /**
-     * Return the default value of the given parameter.
-     *
-     * @param \Quanta\Parameters\ParameterInterface $parameter
-     * @return array
-     */
-    private function defaults(ParameterInterface $parameter): array
-    {
-        if ($parameter->hasDefaultValue()) {
-            return [$parameter->defaultValue()];
-        }
-
-        if ($parameter->allowsNull()) {
-            return [null];
-        }
-
-        return [];
     }
 }

@@ -47,7 +47,7 @@ final class UnboundCallable implements CallableInterface
      */
     public function required(): array
     {
-        if ($this->hasDefaultValue()) {
+        if ($this->isOptional()) {
             return $this->callable->required();
         }
 
@@ -59,7 +59,7 @@ final class UnboundCallable implements CallableInterface
      */
     public function optional(): array
     {
-        if (! $this->hasDefaultValue()) {
+        if (! $this->isOptional()) {
             return [];
         }
 
@@ -74,22 +74,6 @@ final class UnboundCallable implements CallableInterface
     public function __invoke(...$xs)
     {
         if (count($xs) >= count($this->required())) {
-            $parameters = $this->parameters();
-
-            for ($i = count($xs); $i < count($parameters); $i++) {
-                $arguments = [];
-
-                if ($parameters[$i]->hasDefaultValue()) {
-                    $arguments = [$parameters[$i]->defaultValue()];
-                }
-
-                if ($parameters[$i]->allowsNull()) {
-                    $arguments = [null];
-                }
-
-                $xs = array_merge($xs, $arguments);
-            }
-
             return ($this->callable)(...$xs);
         }
 
@@ -101,10 +85,9 @@ final class UnboundCallable implements CallableInterface
      *
      * @return bool
      */
-    private function hasDefaultValue(): bool
+    private function isOptional(): bool
     {
         return $this->parameter->hasDefaultValue()
-            || $this->parameter->allowsNull()
             || $this->parameter->isVariadic();
     }
 }
