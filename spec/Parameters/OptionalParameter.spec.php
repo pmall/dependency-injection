@@ -2,8 +2,10 @@
 
 use function Eloquent\Phony\Kahlan\mock;
 
+use Quanta\DI\Parameters\TypeHint;
 use Quanta\DI\Parameters\OptionalParameter;
 use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Parameters\TypeHintErrorMessage;
 
 describe('OptionalParameter', function () {
 
@@ -11,65 +13,41 @@ describe('OptionalParameter', function () {
 
         $this->delegate = mock(ParameterInterface::class);
 
-        $this->parameter = new OptionalParameter($this->delegate->get(), 'default');
-
     });
 
-    it('should implement ParameterInterface', function () {
+    context('when the default value is not null', function () {
 
-        expect($this->parameter)->toBeAnInstanceOf(ParameterInterface::class);
+        beforeEach(function () {
 
-    });
-
-    describe('->name()', function () {
-
-        it('should return the delegate name', function () {
-
-            $this->delegate->name->returns('$name');
-
-            $test = $this->parameter->name();
-
-            expect($test)->toEqual('$name');
+            $this->parameter = new OptionalParameter($this->delegate->get(), ...[
+                'default',
+            ]);
 
         });
 
-    });
+        it('should implement ParameterInterface', function () {
 
-    describe('->typeHint()', function () {
-
-        it('should return the delegate type hint', function () {
-
-            $this->delegate->typeHint->returns('typehint');
-
-            $test = $this->parameter->typeHint();
-
-            expect($test)->toEqual('typehint');
+            expect($this->parameter)->toBeAnInstanceOf(ParameterInterface::class);
 
         });
 
-    });
+        describe('->name()', function () {
 
-    describe('->hasTypeHint()', function () {
+            it('should return the delegate name', function () {
 
-        context('when the delegate hasTypeHint returns true', function () {
+                $this->delegate->name->returns('name');
 
-            it('should return true', function () {
+                $test = $this->parameter->name();
 
-                $this->delegate->hasTypeHint->returns(true);
-
-                $test = $this->parameter->hasTypeHint();
-
-                expect($test)->toBeTruthy();
+                expect($test)->toEqual('name');
 
             });
 
         });
 
-        context('when the delegate hasTypeHint returns false', function () {
+        describe('->hasTypeHint()', function () {
 
             it('should return false', function () {
-
-                $this->delegate->hasTypeHint->returns(false);
 
                 $test = $this->parameter->hasTypeHint();
 
@@ -79,17 +57,23 @@ describe('OptionalParameter', function () {
 
         });
 
-    });
+        describe('->typeHint()', function () {
 
-    describe('->hasClassTypeHint()', function () {
+            it('should throw a LogicException', function () {
 
-        context('when the delegate hasClassTypeHint returns true', function () {
+                expect([$this->parameter, 'typeHint'])->toThrow(new LogicException(
+                    (string) new TypeHintErrorMessage($this->parameter)
+                ));
+
+            });
+
+        });
+
+        describe('->hasDefaultValue()', function () {
 
             it('should return true', function () {
 
-                $this->delegate->hasClassTypeHint->returns(true);
-
-                $test = $this->parameter->hasClassTypeHint();
+                $test = $this->parameter->hasDefaultValue();
 
                 expect($test)->toBeTruthy();
 
@@ -97,15 +81,13 @@ describe('OptionalParameter', function () {
 
         });
 
-        context('when the delegate hasClassTypeHint returns false', function () {
+        describe('->defaultValue()', function () {
 
-            it('should return false', function () {
+            it('should return the default value', function () {
 
-                $this->delegate->hasClassTypeHint->returns(false);
+                $test = $this->parameter->defaultValue();
 
-                $test = $this->parameter->hasClassTypeHint();
-
-                expect($test)->toBeFalsy();
+                expect($test)->toEqual('default');
 
             });
 
@@ -113,39 +95,89 @@ describe('OptionalParameter', function () {
 
     });
 
-    describe('->defaultValue()', function () {
+    context('when the default value is null', function () {
 
-        it('should return the default value', function () {
+        beforeEach(function () {
 
-            $test = $this->parameter->defaultValue();
-
-            expect($test)->toEqual('default');
-
-        });
-
-    });
-
-    describe('->hasDefaultValue()', function () {
-
-        it('should return true', function () {
-
-            $test = $this->parameter->hasDefaultValue();
-
-            expect($test)->toBeTruthy();
+            $this->parameter = new OptionalParameter($this->delegate->get(), ...[
+                null,
+            ]);
 
         });
 
-    });
+        it('should implement ParameterInterface', function () {
 
-    describe('->allowsNull()', function () {
+            expect($this->parameter)->toBeAnInstanceOf(ParameterInterface::class);
 
-        context('when the delegate allowsNull returns true', function () {
+        });
+
+        describe('->name()', function () {
+
+            it('should return the delegate name', function () {
+
+                $this->delegate->name->returns('name');
+
+                $test = $this->parameter->name();
+
+                expect($test)->toEqual('name');
+
+            });
+
+        });
+
+        describe('->hasTypeHint()', function () {
+
+            context('when the delegate has a type hint', function () {
+
+                it('should return true', function () {
+
+                    $this->delegate->hasTypeHint->returns(true);
+
+                    $test = $this->parameter->hasTypeHint();
+
+                    expect($test)->toBeTruthy();
+
+                });
+
+            });
+
+            context('when the delegate does not have a type hint', function () {
+
+                it('should return false', function () {
+
+                    $this->delegate->hasTypeHint->returns(false);
+
+                    $test = $this->parameter->hasTypeHint();
+
+                    expect($test)->toBeFalsy();
+
+                });
+
+            });
+
+        });
+
+        describe('->typeHint()', function () {
+
+            it('should return the delegate type hint', function () {
+
+                $type = new TypeHint(SomeClass::class, true);
+
+                $this->delegate->typeHint->returns($type);
+
+                $test = $this->parameter->typeHint();
+
+                expect($test)->toBe($type);
+
+            });
+
+        });
+
+        describe('->hasDefaultValue()', function () {
 
             it('should return true', function () {
 
-                $this->delegate->allowsNull->returns(true);
-
-                $test = $this->parameter->allowsNull();
+                $test = $this->parameter->hasDefaultValue();
 
                 expect($test)->toBeTruthy();
 
@@ -153,47 +185,13 @@ describe('OptionalParameter', function () {
 
         });
 
-        context('when the delegate allowsNull returns false', function () {
+        describe('->defaultValue()', function () {
 
-            it('should return false', function () {
+            it('should return null', function () {
 
-                $this->delegate->allowsNull->returns(false);
+                $test = $this->parameter->defaultValue();
 
-                $test = $this->parameter->allowsNull();
-
-                expect($test)->toBeFalsy();
-
-            });
-
-        });
-
-    });
-
-    describe('->isVariadic()', function () {
-
-        context('when the delegate isVariadic returns true', function () {
-
-            it('should return true', function () {
-
-                $this->delegate->isVariadic->returns(true);
-
-                $test = $this->parameter->isVariadic();
-
-                expect($test)->toBeTruthy();
-
-            });
-
-        });
-
-        context('when the delegate isVariadic returns false', function () {
-
-            it('should return false', function () {
-
-                $this->delegate->isVariadic->returns(false);
-
-                $test = $this->parameter->isVariadic();
-
-                expect($test)->toBeFalsy();
+                expect($test)->toBeNull();
 
             });
 

@@ -12,7 +12,7 @@ final class OptionalParameter implements ParameterInterface
     private $parameter;
 
     /**
-     * The parameter default value.
+     * The default value.
      *
      * @var mixed
      */
@@ -41,33 +41,27 @@ final class OptionalParameter implements ParameterInterface
     /**
      * @inheritdoc
      */
-    public function typeHint(): string
-    {
-        return $this->parameter->typeHint();
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function hasTypeHint(): bool
     {
-        return $this->parameter->hasTypeHint();
+        if (is_null($this->default)) {
+            return $this->parameter->hasTypeHint();
+        }
+
+        return false;
     }
 
     /**
      * @inheritdoc
      */
-    public function hasClassTypeHint(): bool
+    public function typeHint(): TypeHint
     {
-        return $this->parameter->hasClassTypeHint();
-    }
+        if (is_null($this->default)) {
+            return $this->parameter->typeHint();
+        }
 
-    /**
-     * @inheritdoc
-     */
-    public function defaultValue()
-    {
-        return $this->default;
+        throw new \LogicException(
+            (string) new TypeHintErrorMessage($this)
+        );
     }
 
     /**
@@ -81,16 +75,8 @@ final class OptionalParameter implements ParameterInterface
     /**
      * @inheritdoc
      */
-    public function allowsNull(): bool
+    public function defaultValue()
     {
-        return $this->parameter->allowsNull();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isVariadic(): bool
-    {
-        return $this->parameter->isVariadic();
+        return $this->default;
     }
 }

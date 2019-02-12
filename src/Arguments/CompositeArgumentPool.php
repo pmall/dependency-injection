@@ -26,8 +26,16 @@ final class CompositeArgumentPool implements ArgumentPoolInterface
     /**
      * @inheritdoc
      */
-    public function arguments(ParameterInterface $parameter): array
+    public function argument(ParameterInterface $parameter): ArgumentInterface
     {
-        return array_reduce($this->pools, new ChainArgumentPool($parameter), []);
+        foreach ($this->pools as $pool) {
+            $argument = $pool->argument($parameter);
+
+            if ($argument->isBound()) {
+                return $argument;
+            }
+        }
+
+        return $argument ?? new UnboundArgument;
     }
 }

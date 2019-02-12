@@ -12,22 +12,31 @@ final class TypeHintedParameter implements ParameterInterface
     private $parameter;
 
     /**
-     * The parameter type hint.
+     * The type hint.
      *
      * @var string
      */
-    private $class;
+    private $type;
+
+    /**
+     * Whether the parameter allows null argument.
+     *
+     * @var bool
+     */
+    private $nullable;
 
     /**
      * Constructor.
      *
      * @param \Quanta\DI\Parameters\ParameterInterface  $parameter
-     * @param string                                    $class
+     * @param string                                    $type
+     * @param bool                                      $nullable
      */
-    public function __construct(ParameterInterface $parameter, string $class)
+    public function __construct(ParameterInterface $parameter, string $type, bool $nullable = false)
     {
         $this->parameter = $parameter;
-        $this->class = $class;
+        $this->type = $type;
+        $this->nullable = $nullable;
     }
 
     /**
@@ -41,14 +50,6 @@ final class TypeHintedParameter implements ParameterInterface
     /**
      * @inheritdoc
      */
-    public function typeHint(): string
-    {
-        return $this->class;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function hasTypeHint(): bool
     {
         return true;
@@ -57,17 +58,9 @@ final class TypeHintedParameter implements ParameterInterface
     /**
      * @inheritdoc
      */
-    public function hasClassTypeHint(): bool
+    public function typeHint(): TypeHint
     {
-        return true;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function defaultValue()
-    {
-        return $this->parameter->defaultValue();
+        return new TypeHint($this->type, $this->nullable);
     }
 
     /**
@@ -75,22 +68,20 @@ final class TypeHintedParameter implements ParameterInterface
      */
     public function hasDefaultValue(): bool
     {
-        return $this->parameter->hasDefaultValue();
+        return $this->nullable;
     }
 
     /**
      * @inheritdoc
      */
-    public function allowsNull(): bool
+    public function defaultValue()
     {
-        return $this->parameter->allowsNull();
-    }
+        if ($this->nullable) {
+            return null;
+        }
 
-    /**
-     * @inheritdoc
-     */
-    public function isVariadic(): bool
-    {
-        return $this->parameter->isVariadic();
+        throw new \LogicException(
+            (string) new DefaultValueErrorMessage($this)
+        );
     }
 }

@@ -2,18 +2,21 @@
 
 use function Eloquent\Phony\Kahlan\mock;
 
+use Quanta\DI\Parameters\TypeHint;
 use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Parameters\TypeHintErrorMessage;
+use Quanta\DI\Parameters\DefaultValueErrorMessage;
 use Quanta\DI\Parameters\ReflectionParameterAdapter;
 
 describe('ReflectionParameterAdapter', function () {
 
     beforeEach(function () {
 
-        $this->delegate = mock(ReflectionParameter::class);
+        $this->reflection = mock(ReflectionParameter::class);
 
-        $this->delegate->getName->returns('name');
+        $this->reflection->getName->returns('name');
 
-        $this->parameter = new ReflectionParameterAdapter($this->delegate->get());
+        $this->parameter = new ReflectionParameterAdapter($this->reflection->get());
 
     });
 
@@ -29,7 +32,65 @@ describe('ReflectionParameterAdapter', function () {
 
             $test = $this->parameter->name();
 
-            expect($test)->toEqual('$name');
+            expect($test)->toEqual('name');
+
+        });
+
+    });
+
+    describe('->hasTypeHint()', function () {
+
+        context('when the parameter type is not null', function () {
+
+            beforeEach(function () {
+
+                $this->type = mock(ReflectionNamedType::class);
+
+                $this->reflection->getType->returns($this->type);
+
+            });
+
+            context('when the type is not built in', function () {
+
+                it('should return true', function () {
+
+                    $this->type->isBuiltIn->returns(false);
+
+                    $test = $this->parameter->hasTypeHint();
+
+                    expect($test)->toBeTruthy();
+
+                });
+
+            });
+
+            context('when the type is built in', function () {
+
+                it('should return false', function () {
+
+                    $this->type->isBuiltIn->returns(true);
+
+                    $test = $this->parameter->hasTypeHint();
+
+                    expect($test)->toBeFalsy();
+
+                });
+
+            });
+
+        });
+
+        context('when the parameter type is null', function () {
+
+            it('should return false', function () {
+
+                $this->reflection->getType->returns(null);
+
+                $test = $this->parameter->hasTypeHint();
+
+                expect($test)->toBeFalsy();
+
+            });
 
         });
 
@@ -39,105 +100,63 @@ describe('ReflectionParameterAdapter', function () {
 
         context('when the parameter type is not null', function () {
 
-            it('should return the type as a string', function () {
+            beforeEach(function () {
 
-                $type = mock(ReflectionType::class);
+                $this->type = mock(ReflectionNamedType::class);
 
-                $type->__toString->returns('type');
+                $this->type->getName->returns(SomeClass::class);
 
-                $this->delegate->getType->returns($type);
-
-                $test = $this->parameter->typeHint();
-
-                expect($test)->toEqual('type');
-
-            });
-
-        });
-
-        context('when the parameter type is null', function () {
-
-            it('should throw a LogicException', function () {
-
-                $this->delegate->getType->returns(null);
-
-                $test = [$this->parameter, 'typeHint'];
-
-                expect($test)->toThrow(new LogicException);
-
-            });
-
-        });
-
-    });
-
-    describe('->hasTypeHint()', function () {
-
-        context('when the parameter has a type hint', function () {
-
-            it('should return true', function () {
-
-                $this->delegate->hasType->returns(true);
-
-                $test = $this->parameter->hasTypeHint();
-
-                expect($test)->toBeTruthy();
-
-            });
-
-        });
-
-        context('when the parameter does not have a type hint', function () {
-
-            it('should return false', function () {
-
-                $this->delegate->hasType->returns(false);
-
-                $test = $this->parameter->hasTypeHint();
-
-                expect($test)->toBeFalsy();
-
-            });
-
-        });
-
-    });
-
-    describe('->hasClassTypeHint()', function () {
-
-        context('when the parameter type is not null', function () {
-
-            context('when the type is built in', function () {
-
-                it('should return false', function () {
-
-                    $type = mock(ReflectionType::class);
-
-                    $type->isBuiltIn->returns(true);
-
-                    $this->delegate->getType->returns($type);
-
-                    $test = $this->parameter->hasClassTypeHint();
-
-                    expect($test)->toBeFalsy();
-
-                });
+                $this->reflection->getType->returns($this->type);
 
             });
 
             context('when the type is not built in', function () {
 
-                it('should return true', function () {
+                beforeEach(function () {
 
-                    $type = mock(ReflectionType::class);
+                    $this->type->isBuiltIn->returns(false);
 
-                    $type->isBuiltIn->returns(false);
+                });
 
-                    $this->delegate->getType->returns($type);
+                context('when the parameter does not allow null', function () {
 
-                    $test = $this->parameter->hasClassTypeHint();
+                    it('should return a non nullable type hint', function () {
 
-                    expect($test)->toBeTruthy();
+                        $this->reflection->allowsNull->returns(false);
+
+                        $test = $this->parameter->typeHint();
+
+                        expect($test)->toEqual(new TypeHint(SomeClass::class, false));
+
+                    });
+
+                });
+
+                context('when the parameter allows null', function () {
+
+                    it('should return a nullable type hint', function () {
+
+                        $this->reflection->allowsNull->returns(true);
+
+                        $test = $this->parameter->typeHint();
+
+                        expect($test)->toEqual(new TypeHint(SomeClass::class, true));
+
+                    });
+
+                });
+
+            });
+
+            context('when the type is built in', function () {
+
+                it('should throw a LogicException', function () {
+
+                    $this->type->isBuiltIn->returns(true);
+
+                    expect([$this->parameter, 'typeHint'])->toThrow(new LogicException(
+                        (string) new TypeHintErrorMessage($this->parameter)
+                    ));
 
                 });
 
@@ -147,45 +166,13 @@ describe('ReflectionParameterAdapter', function () {
 
         context('when the parameter type is null', function () {
 
-            it('should return false', function () {
-
-                $this->delegate->getType->returns(null);
-
-                $test = $this->parameter->hasClassTypeHint();
-
-                expect($test)->toBeFalsy();
-
-            });
-
-        });
-
-    });
-
-    describe('->defaultValue()', function () {
-
-        context('when the parameter ->getDefaultValue() does not throw an exception', function () {
-
-            it('should return the default value', function () {
-
-                $this->delegate->getDefaultValue->returns('default');
-
-                $test = $this->parameter->defaultValue();
-
-                expect($test)->toEqual('default');
-
-            });
-
-        });
-
-        context('when the parameter ->getDefaultValue() throws a ReflectionException', function () {
-
             it('should throw a LogicException', function () {
 
-                $this->delegate->getDefaultValue->throws(new ReflectionException);
+                $this->reflection->getType->returns(null);
 
-                $test = [$this->parameter, 'defaultValue'];
-
-                expect($test)->toThrow(new LogicException);
+                expect([$this->parameter, 'typeHint'])->toThrow(new LogicException(
+                    (string) new TypeHintErrorMessage($this->parameter)
+                ));
 
             });
 
@@ -199,7 +186,7 @@ describe('ReflectionParameterAdapter', function () {
 
             it('should return true', function () {
 
-                $this->delegate->isDefaultValueAvailable->returns(true);
+                $this->reflection->isDefaultValueAvailable->returns(true);
 
                 $test = $this->parameter->hasDefaultValue();
 
@@ -211,13 +198,37 @@ describe('ReflectionParameterAdapter', function () {
 
         context('when the parameter does not have a default value', function () {
 
-            it('should return false', function () {
+            beforeEach(function () {
 
-                $this->delegate->isDefaultValueAvailable->returns(false);
+                $this->reflection->isDefaultValueAvailable->returns(false);
 
-                $test = $this->parameter->hasDefaultValue();
+            });
 
-                expect($test)->toBeFalsy();
+            context('when the parameter allows null', function () {
+
+                it('should return true', function () {
+
+                    $this->reflection->allowsNull->returns(true);
+
+                    $test = $this->parameter->hasDefaultValue();
+
+                    expect($test)->toBeTruthy();
+
+                });
+
+            });
+
+            context('when the parameter does not allow null', function () {
+
+                it('should return false', function () {
+
+                    $this->reflection->allowsNull->returns(false);
+
+                    $test = $this->parameter->hasDefaultValue();
+
+                    expect($test)->toBeFalsy();
+
+                });
 
             });
 
@@ -225,63 +236,56 @@ describe('ReflectionParameterAdapter', function () {
 
     });
 
-    describe('->allowsNull()', function () {
+    describe('->defaultValue()', function () {
 
-        context('when the parameter allows null', function () {
+        context('when the parameter has a default value', function () {
 
-            it('should return true', function () {
+            it('should return the default value', function () {
 
-                $this->delegate->allowsNull->returns(true);
+                $this->reflection->isDefaultValueAvailable->returns(true);
+                $this->reflection->getDefaultValue->returns('default');
 
-                $test = $this->parameter->allowsNull();
+                $test = $this->parameter->defaultValue();
 
-                expect($test)->toBeTruthy();
-
-            });
-
-        });
-
-        context('when the parameter does not allow null', function () {
-
-            it('should return false', function () {
-
-                $this->delegate->allowsNull->returns(false);
-
-                $test = $this->parameter->allowsNull();
-
-                expect($test)->toBeFalsy();
+                expect($test)->toEqual('default');
 
             });
 
         });
 
-    });
+        context('when the parameter does not have a default value', function () {
 
-    describe('->isVariadic()', function () {
+            beforeEach(function () {
 
-        context('when the parameter is variadic', function () {
-
-            it('should return true', function () {
-
-                $this->delegate->isVariadic->returns(true);
-
-                $test = $this->parameter->isVariadic();
-
-                expect($test)->toBeTruthy();
+                $this->reflection->isDefaultValueAvailable->returns(false);
 
             });
 
-        });
+            context('when the parameter allows null', function () {
 
-        context('when the parameter is not variadic', function () {
+                it('should return null', function () {
 
-            it('should return false', function () {
+                    $this->reflection->allowsNull->returns(true);
 
-                $this->delegate->isVariadic->returns(false);
+                    $test = $this->parameter->defaultValue();
 
-                $test = $this->parameter->isVariadic();
+                    expect($test)->toBeNull();
 
-                expect($test)->toBeFalsy();
+                });
+
+            });
+
+            context('when the parameter does not allow null', function () {
+
+                it('should throw a LogicException', function () {
+
+                    $this->reflection->allowsNull->returns(false);
+
+                    expect([$this->parameter, 'defaultValue'])->toThrow(new LogicException(
+                        (string) new DefaultValueErrorMessage($this->parameter)
+                    ));
+
+                });
 
             });
 

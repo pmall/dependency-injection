@@ -7,16 +7,10 @@ use Quanta\DI\Parameters\ParameterInterface;
 interface ArgumentPoolInterface
 {
     /**
-     * Return an array of arguments the given parameter.
-     *
-     * An array is returned so many values can be returned when the given
-     * parameter is variadic.
-     *
-     * An empty array must be returned when no argument can be inferred for the
-     * given parameter.
+     * Return an argument for the given parameter.
      *
      * @param \Quanta\DI\Parameters\ParameterInterface $parameter
-     * @return array
+     * @return \Quanta\DI\Arguments\ArgumentInterface
      */
-    public function arguments(ParameterInterface $parameter): array;
+    public function argument(ParameterInterface $parameter): ArgumentInterface;
 }

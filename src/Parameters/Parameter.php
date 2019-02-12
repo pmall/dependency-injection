@@ -26,17 +26,7 @@ final class Parameter implements ParameterInterface
      */
     public function name(): string
     {
-        return '$' . $this->name;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function typeHint(): string
-    {
-        throw new \LogicException(
-            sprintf('The parameter $%s has no type hint', $this->name())
-        );
+        return $this->name;
     }
 
     /**
@@ -50,18 +40,10 @@ final class Parameter implements ParameterInterface
     /**
      * @inheritdoc
      */
-    public function hasClassTypeHint(): bool
-    {
-        return false;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function defaultValue()
+    public function typeHint(): TypeHint
     {
         throw new \LogicException(
-            sprintf('The parameter $%s has no default value', $this->name())
+            (string) new TypeHintErrorMessage($this)
         );
     }
 
@@ -76,16 +58,10 @@ final class Parameter implements ParameterInterface
     /**
      * @inheritdoc
      */
-    public function allowsNull(): bool
+    public function defaultValue()
     {
-        return false;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isVariadic(): bool
-    {
-        return false;
+        throw new \LogicException(
+            (string) new DefaultValueErrorMessage($this)
+        );
     }
 }

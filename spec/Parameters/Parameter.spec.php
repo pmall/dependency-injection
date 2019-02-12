@@ -2,6 +2,8 @@
 
 use Quanta\DI\Parameters\Parameter;
 use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Parameters\TypeHintErrorMessage;
+use Quanta\DI\Parameters\DefaultValueErrorMessage;
 
 describe('Parameter', function () {
 
@@ -23,17 +25,7 @@ describe('Parameter', function () {
 
             $test = $this->parameter->name();
 
-            expect($test)->toEqual('$name');
-
-        });
-
-    });
-
-    describe('->typeHint()', function () {
-
-        it('should throw a LogicException', function () {
-
-            expect([$this->parameter, 'typeHint'])->toThrow(new LogicException);
+            expect($test)->toEqual('name');
 
         });
 
@@ -51,23 +43,13 @@ describe('Parameter', function () {
 
     });
 
-    describe('->hasClassTypeHint()', function () {
-
-        it('should return false', function () {
-
-            $test = $this->parameter->hasClassTypeHint();
-
-            expect($test)->toBeFalsy();
-
-        });
-
-    });
-
-    describe('->defaultValue()', function () {
+    describe('->typeHint()', function () {
 
         it('should throw a LogicException', function () {
 
-            expect([$this->parameter, 'defaultValue'])->toThrow(new LogicException);
+            expect([$this->parameter, 'typeHint'])->toThrow(new LogicException(
+                (string) new TypeHintErrorMessage($this->parameter)
+            ));
 
         });
 
@@ -85,25 +67,13 @@ describe('Parameter', function () {
 
     });
 
-    describe('->allowsNull()', function () {
+    describe('->defaultValue()', function () {
 
-        it('should return false', function () {
+        it('should throw a LogicException', function () {
 
-            $test = $this->parameter->allowsNull();
-
-            expect($test)->toBeFalsy();
-
-        });
-
-    });
-
-    describe('->isVariadic()', function () {
-
-        it('should return false', function () {
-
-            $test = $this->parameter->isVariadic();
-
-            expect($test)->toBeFalsy();
+            expect([$this->parameter, 'defaultValue'])->toThrow(new LogicException(
+                (string) new DefaultValueErrorMessage($this->parameter)
+            ));
 
         });
 

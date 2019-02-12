@@ -7,60 +7,43 @@ interface ParameterInterface
     /**
      * Return the parameter name.
      *
-     * It must be prepended with '$'.
-     *
      * @return string
      */
     public function name(): string;
 
     /**
-     * Return the parameter type hint.
+     * Return whether the parameter is type hinted.
      *
-     * @return string
-     * @throws \LogicException
-     */
-    public function typeHint(): string;
-
-    /**
-     * Return whether the parameter has a type hint or not.
+     * Only class names are considered as type hints.
      *
      * @return bool
      */
     public function hasTypeHint(): bool;
 
     /**
-     * Return whether the parameter has a class type hint or not.
+     * Return the parameter type hint.
      *
-     * @return bool
-     */
-    public function hasClassTypeHint(): bool;
-
-    /**
-     * Return the parameter default value.
+     * Should throw a LogicException when ->hasTypeHint() returns false.
      *
-     * @return mixed
+     * @return \Quanta\DI\Parameters\TypeHint
      * @throws \LogicException
      */
-    public function defaultValue();
+    public function typeHint(): TypeHint;
 
     /**
-     * Return whether the parameter has a default value or not.
+     * Return whether the parameter has a default value.
      *
      * @return bool
      */
     public function hasDefaultValue(): bool;
 
     /**
-     * Return whether the parameter accepts null values or not.
+     * Return the parameter default value.
      *
-     * @return bool
-     */
-    public function allowsNull(): bool;
-
-    /**
-     * Return whether the parameter accepts many arguments or not.
+     * Should throw a LogicException when ->hasDefaultValue() returns false.
      *
-     * @return bool
+     * @return mixed
+     * @throws \LogicException
      */
-    public function isVariadic(): bool;
+    public function defaultValue();
 }

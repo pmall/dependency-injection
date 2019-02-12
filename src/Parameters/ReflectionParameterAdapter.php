@@ -2,10 +2,10 @@
 
 namespace Quanta\DI\Parameters;
 
-class ReflectionParameterAdapter implements ParameterInterface
+final class ReflectionParameterAdapter implements ParameterInterface
 {
     /**
-     * The parameter reflection to adapt.
+     * The parameter reflection.
      *
      * @var \ReflectionParameter
      */
@@ -14,10 +14,22 @@ class ReflectionParameterAdapter implements ParameterInterface
     /**
      * Constructor.
      *
+     * Variadic parameters can't be adapted.
+     *
      * @param \ReflectionParameter $reflection
+     * @throws \InvalidArgumentException
      */
     public function __construct(\ReflectionParameter $reflection)
     {
+        if ($reflection->isVariadic()) {
+            throw new \InvalidArgumentException(
+                vsprintf('Variadic parameter $%s can\'t be used as a %s', [
+                    $reflection->getName(),
+                    ParameterInterface::class,
+                ])
+            );
+        }
+
         $this->reflection = $reflection;
     }
 
@@ -26,23 +38,7 @@ class ReflectionParameterAdapter implements ParameterInterface
      */
     public function name(): string
     {
-        return '$' . $this->reflection->getName();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function typeHint(): string
-    {
-        $type = $this->reflection->getType();
-
-        if (! is_null($type)) {
-            return (string) $type;
-        }
-
-        throw new \LogicException(
-            sprintf('The parameter $%s has no type hint', $this->name())
-        );
+        return $this->reflection->getName();
     }
 
     /**
@@ -50,32 +46,25 @@ class ReflectionParameterAdapter implements ParameterInterface
      */
     public function hasTypeHint(): bool
     {
-        return $this->reflection->hasType();
+        $type = $this->reflection->getType();
+
+        return ! is_null($type) && ! $type->isBuiltIn();
     }
 
     /**
      * @inheritdoc
      */
-    public function hasClassTypeHint(): bool
+    public function typeHint(): TypeHint
     {
         $type = $this->reflection->getType();
 
-        return ! (is_null($type) || $type->isBuiltIn());
-    }
+        if (! is_null($type) && ! $type->isBuiltIn()) {
+            return new TypeHint($type->getName(), $this->reflection->allowsNull());
+        }
 
-    /**
-     * @inheritdoc
-     */
-    public function defaultValue()
-    {
-        try {
-            return $this->reflection->getDefaultValue();
-        }
-        catch (\ReflectionException $e) {
-            throw new \LogicException(
-                sprintf('The parameter $%s has no default value', $this->name())
-            );
-        }
+        throw new \LogicException(
+            (string) new TypeHintErrorMessage($this)
+        );
     }
 
     /**
@@ -83,22 +72,25 @@ class ReflectionParameterAdapter implements ParameterInterface
      */
     public function hasDefaultValue(): bool
     {
-        return $this->reflection->isDefaultValueAvailable();
+        return $this->reflection->isDefaultValueAvailable()
+            || $this->reflection->allowsNull();
     }
 
     /**
      * @inheritdoc
      */
-    public function allowsNull(): bool
+    public function defaultValue()
     {
-        return $this->reflection->allowsNull();
-    }
+        if ($this->reflection->isDefaultValueAvailable()) {
+            return $this->reflection->getDefaultValue();
+        }
 
-    /**
-     * @inheritdoc
-     */
-    public function isVariadic(): bool
-    {
-        return $this->reflection->isVariadic();
+        if ($this->reflection->allowsNull()) {
+            return null;
+        }
+
+        throw new \LogicException(
+            (string) new DefaultValueErrorMessage($this)
+        );
     }
 }
