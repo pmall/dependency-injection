@@ -3,8 +3,8 @@
 use function Eloquent\Phony\Kahlan\mock;
 
 use Quanta\PA\CallableInterface;
-use Quanta\DI\Signatures\Signature;
 use Quanta\DI\Signatures\CallableAdapter;
+use Quanta\DI\Signatures\SignatureWithParameter;
 use Quanta\DI\Signatures\CallableParameterSequence;
 use Quanta\DI\Signatures\ParameterSequenceInterface;
 use Quanta\DI\Parameters\ReflectionParameterAdapter;
@@ -42,11 +42,11 @@ describe('CallableParameterSequence', function () {
                 $test = $this->sequence->signature($callable->get());
 
                 expect($test)->toEqual(
-                    new Signature(
-                        new Signature(
-                            new Signature(
-                                new Signature(
-                                    new Signature(
+                    new SignatureWithParameter(
+                        new SignatureWithParameter(
+                            new SignatureWithParameter(
+                                new SignatureWithParameter(
+                                    new SignatureWithParameter(
                                         new CallableAdapter($callable->get()),
                                         new ReflectionParameterAdapter($parameters[0])
                                     ),
@@ -93,11 +93,11 @@ describe('CallableParameterSequence', function () {
                 $test = $this->sequence->signature($callable->get());
 
                 expect($test)->toEqual(
-                    new Signature(
-                        new Signature(
-                            new Signature(
-                                new Signature(
-                                    new Signature(
+                    new SignatureWithParameter(
+                        new SignatureWithParameter(
+                            new SignatureWithParameter(
+                                new SignatureWithParameter(
+                                    new SignatureWithParameter(
                                         new CallableAdapter($callable->get()),
                                         new ReflectionParameterAdapter($parameters[0])
                                     ),
@@ -144,11 +144,11 @@ describe('CallableParameterSequence', function () {
                 $test = $this->sequence->signature($callable->get());
 
                 expect($test)->toEqual(
-                    new Signature(
-                        new Signature(
-                            new Signature(
-                                new Signature(
-                                    new Signature(
+                    new SignatureWithParameter(
+                        new SignatureWithParameter(
+                            new SignatureWithParameter(
+                                new SignatureWithParameter(
+                                    new SignatureWithParameter(
                                         new CallableAdapter($callable->get()),
                                         new ReflectionParameterAdapter($parameters[0])
                                     ),
@@ -195,11 +195,11 @@ describe('CallableParameterSequence', function () {
                 $test = $this->sequence->signature($callable->get());
 
                 expect($test)->toEqual(
-                    new Signature(
-                        new Signature(
-                            new Signature(
-                                new Signature(
-                                    new Signature(
+                    new SignatureWithParameter(
+                        new SignatureWithParameter(
+                            new SignatureWithParameter(
+                                new SignatureWithParameter(
+                                    new SignatureWithParameter(
                                         new CallableAdapter($callable->get()),
                                         new ReflectionParameterAdapter($parameters[0])
                                     ),
@@ -254,11 +254,11 @@ describe('CallableParameterSequence', function () {
                 $test = $this->sequence->signature($callable->get());
 
                 expect($test)->toEqual(
-                    new Signature(
-                        new Signature(
-                            new Signature(
-                                new Signature(
-                                    new Signature(
+                    new SignatureWithParameter(
+                        new SignatureWithParameter(
+                            new SignatureWithParameter(
+                                new SignatureWithParameter(
+                                    new SignatureWithParameter(
                                         new CallableAdapter($callable->get()),
                                         new ReflectionParameterAdapter($parameters[0])
                                     ),

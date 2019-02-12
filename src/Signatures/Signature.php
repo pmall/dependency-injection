@@ -3,36 +3,34 @@
 namespace Quanta\DI\Signatures;
 
 use Quanta\PA\CallableInterface;
-use Quanta\PA\CallableWithPlaceholder;
 use Quanta\DI\Arguments\ArgumentPoolInterface;
-use Quanta\DI\Parameters\ParameterInterface;
 
 final class Signature implements SignatureInterface
 {
     /**
-     * The signature.
+     * The callable arguments must be bound to.
      *
-     * @var \Quanta\DI\Signatures\SignatureInterface
+     * @var \Quanta\PA\CallableInterface
      */
-    private $signature;
+    private $callable;
 
     /**
-     * The parameter bound to the signature.
+     * The sequence of parameters used to retrieve arguments from the pool.
      *
-     * @var \Quanta\DI\Parameters\ParameterInterface
+     * @var \Quanta\DI\Signatures\ParameterSequenceInterface
      */
-    private $parameter;
+    private $sequence;
 
     /**
      * Constructor.
      *
-     * @param \Quanta\DI\Signatures\SignatureInterface $signature
-     * @param \Quanta\DI\Parameters\ParameterInterface $parameter
+     * @param \Quanta\PA\CallableInterface                      $callable
+     * @param \Quanta\DI\Signatures\ParameterSequenceInterface  $sequence
      */
-    public function __construct(SignatureInterface $signature, ParameterInterface $parameter)
+    public function __construct(CallableInterface $callable, ParameterSequenceInterface $sequence)
     {
-        $this->signature = $signature;
-        $this->parameter = $parameter;
+        $this->callable = $callable;
+        $this->sequence = $sequence;
     }
 
     /**
@@ -40,21 +38,6 @@ final class Signature implements SignatureInterface
      */
     public function bound(ArgumentPoolInterface $pool): CallableInterface
     {
-        $bound = $this->signature->bound($pool);
-
-        $argument = $pool->argument($this->parameter);
-
-        if ($argument->isBound()) {
-            return $argument->bound($bound);
-        }
-
-        if ($this->parameter->hasDefaultValue()) {
-            return new CallableWithPlaceholder($bound, ...[
-                $this->parameter->name(),
-                $this->parameter->defaultValue(),
-            ]);
-        }
-
-        return new CallableWithPlaceholder($bound, $this->parameter->name());
+        return $this->sequence->signature($this->callable)->bound($pool);
     }
 }

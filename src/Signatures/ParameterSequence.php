@@ -44,6 +44,6 @@ final class ParameterSequence implements ParameterSequenceInterface
      */
     private function reduced(SignatureInterface $signature, ParameterInterface $parameter): SignatureInterface
     {
-        return new Signature($signature, $parameter);
+        return new SignatureWithParameter($signature, $parameter);
     }
 }

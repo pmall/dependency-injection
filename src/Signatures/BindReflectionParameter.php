@@ -16,7 +16,7 @@ final class BindReflectionParameter
     public function __invoke(SignatureInterface $signature, \ReflectionParameter $reflection): SignatureInterface
     {
         return ! $reflection->isVariadic()
-            ? new Signature($signature, new ReflectionParameterAdapter($reflection))
+            ? new SignatureWithParameter($signature, new ReflectionParameterAdapter($reflection))
             : $signature;
     }
 }

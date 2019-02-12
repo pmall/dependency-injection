@@ -2,10 +2,9 @@
 
 use function Eloquent\Phony\Kahlan\mock;
 
-use Quanta\DI\Signatures\Signature;
 use Quanta\DI\Signatures\SignatureInterface;
+use Quanta\DI\Signatures\SignatureWithParameter;
 use Quanta\DI\Signatures\BindReflectionParameter;
-
 use Quanta\DI\Parameters\ReflectionParameterAdapter;
 
 describe('BindReflectionParameter', function () {
@@ -36,7 +35,7 @@ describe('BindReflectionParameter', function () {
                     $this->reflection->get()
                 );
 
-                expect($test)->toEqual(new Signature(
+                expect($test)->toEqual(new SignatureWithParameter(
                     $this->signature->get(),
                     new ReflectionParameterAdapter($this->reflection->get())
                 ));

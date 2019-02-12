@@ -6,83 +6,108 @@ use Quanta\PA\CallableAdapter;
 use Quanta\PA\CallableInterface;
 use Quanta\PA\ConstructorAdapter;
 use Quanta\PA\PlaceholderSequence;
-
-use Quanta\DI\Autowirable;
-use Quanta\DI\AutowirableInterface;
+use Quanta\DI\Autowired;
 use Quanta\DI\Arguments\ArgumentPoolInterface;
+use Quanta\DI\Arguments\CompositeArgumentPool;
+use Quanta\DI\Signatures\Signature;
 use Quanta\DI\Signatures\SignatureInterface;
 use Quanta\DI\Signatures\CallableParameterSequence;
-use Quanta\DI\Signatures\ParameterSequenceInterface;
 use Quanta\DI\Signatures\ConstructorParameterSequence;
 
-describe('Autowirable::fromCallable()', function () {
+describe('Autowired::fromCallable()', function () {
 
-    it('should return a new autowirable from the given callable', function () {
+    it('should return a new autowired from the given callable and argument pools', function () {
 
         $callable = function () {};
 
-        $test = Autowirable::fromCallable($callable);
+        $pool1 = mock(ArgumentPoolInterface::class);
+        $pool2 = mock(ArgumentPoolInterface::class);
+        $pool3 = mock(ArgumentPoolInterface::class);
 
-        expect($test)->toEqual(new Autowirable(
-            new CallableAdapter($callable),
-            new CallableParameterSequence($callable)
+        $test = Autowired::fromCallable($callable, ...[
+            $pool1->get(),
+            $pool2->get(),
+            $pool3->get(),
+        ]);
+
+        expect($test)->toEqual(new Autowired(
+            new Signature(
+                new CallableAdapter($callable),
+                new CallableParameterSequence($callable)
+            ),
+            $pool1->get(),
+            $pool2->get(),
+            $pool3->get()
         ));
 
     });
 
 });
 
-describe('Autowirable::fromClass()', function () {
+describe('Autowired::fromClass()', function () {
 
-    it('should return a new autowirable from the given class name', function () {
+    it('should return a new autowired from the given class name and argument pools', function () {
 
-        $test = Autowirable::fromClass(SomeClass::class);
+        $pool1 = mock(ArgumentPoolInterface::class);
+        $pool2 = mock(ArgumentPoolInterface::class);
+        $pool3 = mock(ArgumentPoolInterface::class);
 
-        expect($test)->toEqual(new Autowirable(
-            new ConstructorAdapter(SomeClass::class),
-            new ConstructorParameterSequence(SomeClass::class)
+        $test = Autowired::fromClass(SomeClass::class, ...[
+            $pool1->get(),
+            $pool2->get(),
+            $pool3->get(),
+        ]);
+
+        expect($test)->toEqual(new Autowired(
+            new Signature(
+                new ConstructorAdapter(SomeClass::class),
+                new ConstructorParameterSequence(SomeClass::class)
+            ),
+            $pool1->get(),
+            $pool2->get(),
+            $pool3->get()
         ));
 
     });
 
+
 });
 
-describe('Autowirable', function () {
+describe('Autowired', function () {
 
     beforeEach(function () {
 
-        $this->callable = mock(CallableInterface::class);
-        $this->sequence = mock(ParameterSequenceInterface::class);
+        $this->signature = mock(SignatureInterface::class);
 
-        $this->autowirable = new Autowirable(
-            $this->callable->get(),
-            $this->sequence->get()
-        );
+        $this->pool1 = mock(ArgumentPoolInterface::class);
+        $this->pool2 = mock(ArgumentPoolInterface::class);
+        $this->pool3 = mock(ArgumentPoolInterface::class);
 
-    });
-
-    it('should implement AutowirableInterface', function () {
-
-        expect($this->autowirable)->toBeAnInstanceOf(AutowirableInterface::class);
+        $this->autowired = new Autowired($this->signature->get(), ...[
+            $this->pool1->get(),
+            $this->pool2->get(),
+            $this->pool3->get(),
+        ]);
 
     });
 
-    describe('->autowirable()', function () {
+    describe('->__invoke()', function () {
 
         beforeEach(function () {
 
-            $signature = mock(SignatureInterface::class);
+            $pool = new CompositeArgumentPool(...[
+                $this->pool1->get(),
+                $this->pool2->get(),
+                $this->pool3->get(),
+            ]);
 
-            $this->pool = mock(ArgumentPoolInterface::class);
             $this->bound = mock(CallableInterface::class);
 
-            $this->sequence->signature->with($this->callable)->returns($signature);
-
-            $signature->bound->with($this->pool)->returns($this->bound);
+            $this->signature->bound->with($pool)->returns($this->bound);
 
         });
 
-        context('when the bound callable has no placeholder', function () {
+        context('when the autowired callable has no placeholder', function () {
 
             beforeEach(function () {
 
@@ -92,11 +117,11 @@ describe('Autowirable', function () {
 
             context('when no argument are given', function () {
 
-                it('should proxy the bound callable with no argument', function () {
+                it('should proxy the autowired callable with no argument', function () {
 
                     $this->bound->__invoke->with()->returns('value');
 
-                    $test = ($this->autowirable)($this->pool->get());
+                    $test = ($this->autowired)();
 
                     expect($test)->toEqual('value');
 
@@ -110,7 +135,7 @@ describe('Autowirable', function () {
 
                     $this->bound->__invoke->with('v1', 'v2', 'v3')->returns('value');
 
-                    $test = ($this->autowirable)($this->pool->get(), 'v1', 'v2', 'v3');
+                    $test = ($this->autowired)('v1', 'v2', 'v3');
 
                     expect($test)->toEqual('value');
 
@@ -133,7 +158,7 @@ describe('Autowirable', function () {
                 it('should throw a LogicException', function () {
 
                     $test = function () {
-                        ($this->autowirable)($this->pool->get(), 'v1', 'v2');
+                        ($this->autowired)('v1', 'v2');
                     };
 
                     expect($test)->toThrow(new LogicException);
@@ -145,7 +170,7 @@ describe('Autowirable', function () {
                     $this->bound->str->returns('str');
 
                     try {
-                        ($this->autowirable)($this->pool->get(), 'v1');
+                        ($this->autowired)('v1');
                     }
 
                     catch (LogicException $e) {
@@ -165,7 +190,7 @@ describe('Autowirable', function () {
 
                     $this->bound->__invoke->with('v1', 'v2', 'v3')->returns('value');
 
-                    $test = ($this->autowirable)($this->pool->get(), 'v1', 'v2', 'v3');
+                    $test = ($this->autowired)('v1', 'v2', 'v3');
 
                     expect($test)->toEqual('value');
 
@@ -179,7 +204,7 @@ describe('Autowirable', function () {
 
                     $this->bound->__invoke->with('v1', 'v2', 'v3', 'v4', 'v5')->returns('value');
 
-                    $test = ($this->autowirable)($this->pool->get(), 'v1', 'v2', 'v3', 'v4', 'v5');
+                    $test = ($this->autowired)('v1', 'v2', 'v3', 'v4', 'v5');
 
                     expect($test)->toEqual('value');
 

@@ -3,23 +3,21 @@
 use function Eloquent\Phony\Kahlan\mock;
 
 use Quanta\PA\CallableInterface;
-use Quanta\PA\CallableWithPlaceholder;
-use Quanta\DI\Arguments\ArgumentInterface;
 use Quanta\DI\Arguments\ArgumentPoolInterface;
 use Quanta\DI\Signatures\Signature;
 use Quanta\DI\Signatures\SignatureInterface;
-use Quanta\DI\Parameters\ParameterInterface;
+use Quanta\DI\Signatures\ParameterSequenceInterface;
 
-describe('SignatureAdapter', function () {
+describe('Signature', function () {
 
     beforeEach(function () {
 
-        $this->delegate = mock(SignatureInterface::class);
-        $this->parameter = mock(ParameterInterface::class);
+        $this->callable = mock(CallableInterface::class);
+        $this->sequence = mock(ParameterSequenceInterface::class);
 
         $this->signature = new Signature(
-            $this->delegate->get(),
-            $this->parameter->get()
+            $this->callable->get(),
+            $this->sequence->get()
         );
 
     });
@@ -30,83 +28,21 @@ describe('SignatureAdapter', function () {
 
     });
 
-    describe('->bound()', function () {
+    describe('->autowired()', function () {
 
-        beforeEach(function () {
+        it('should return a callable from the given argument pool', function () {
 
-            $this->pool = mock(ArgumentPoolInterface::class);
+            $pool = mock(ArgumentPoolInterface::class);
+            $signature = mock(SignatureInterface::class);
+            $callable = mock(CallableInterface::class);
 
-            $this->callable = mock(CallableInterface::class);
-            $this->argument = mock(ArgumentInterface::class);
+            $this->sequence->signature->with($this->callable)->returns($signature);
 
-            $this->delegate->bound->with($this->pool)->returns($this->callable);
-            $this->pool->argument->with($this->parameter)->returns($this->argument);
+            $signature->bound->with($pool)->returns($callable);
 
-        });
+            $test = $this->signature->bound($pool->get());
 
-        context('when the argument from the argument pool is bound', function () {
-
-            it('should return the callable bound by the argument', function () {
-
-                $callable = mock(CallableInterface::class);
-
-                $this->argument->isBound->returns(true);
-
-                $this->argument->bound->with($this->callable)->returns($callable);
-
-                $test = $this->signature->bound($this->pool->get());
-
-                expect($test)->toBe($callable->get());
-
-            });
-
-        });
-
-        context('when the argument from the argument pool is not bound', function () {
-
-            beforeEach(function () {
-
-                $this->argument->isBound->returns(false);
-
-                $this->parameter->name->returns('parameter');
-
-            });
-
-            context('when the parameter has a default value', function () {
-
-                it('should bind the callable to a placeholder with a default value', function () {
-
-                    $this->parameter->hasDefaultValue->returns(true);
-                    $this->parameter->defaultValue->returns('default');
-
-                    $test = $this->signature->bound($this->pool->get());
-
-                    expect($test)->toEqual(new CallableWithPlaceholder(
-                        $this->callable->get(),
-                        'parameter',
-                        'default'
-                    ));
-
-                });
-
-            });
-
-            context('when the parameter does not have a default value', function () {
-
-                it('should bind the callable to a placeholder with no default value', function () {
-
-                    $this->parameter->hasDefaultValue->returns(false);
-
-                    $test = $this->signature->bound($this->pool->get());
-
-                    expect($test)->toEqual(new CallableWithPlaceholder(
-                        $this->callable->get(),
-                        'parameter'
-                    ));
-
-                });
-
-            });
+            expect($test)->toBe($callable->get());
 
         });
 
