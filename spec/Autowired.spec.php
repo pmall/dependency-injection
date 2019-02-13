@@ -9,9 +9,9 @@ use Quanta\PA\PlaceholderSequence;
 use Quanta\DI\Autowired;
 use Quanta\DI\Arguments\ArgumentPoolInterface;
 use Quanta\DI\Arguments\CompositeArgumentPool;
-use Quanta\DI\Signatures\Signature;
 use Quanta\DI\Signatures\SignatureInterface;
 use Quanta\DI\Signatures\CallableParameterSequence;
+use Quanta\DI\Signatures\ParameterSequenceInterface;
 use Quanta\DI\Signatures\ConstructorParameterSequence;
 
 describe('Autowired::fromCallable()', function () {
@@ -31,10 +31,8 @@ describe('Autowired::fromCallable()', function () {
         ]);
 
         expect($test)->toEqual(new Autowired(
-            new Signature(
-                new CallableAdapter($callable),
-                new CallableParameterSequence($callable)
-            ),
+            new CallableAdapter($callable),
+            new CallableParameterSequence($callable),
             $pool1->get(),
             $pool2->get(),
             $pool3->get()
@@ -59,10 +57,8 @@ describe('Autowired::fromClass()', function () {
         ]);
 
         expect($test)->toEqual(new Autowired(
-            new Signature(
-                new ConstructorAdapter(SomeClass::class),
-                new ConstructorParameterSequence(SomeClass::class)
-            ),
+            new ConstructorAdapter(SomeClass::class),
+            new ConstructorParameterSequence(SomeClass::class),
             $pool1->get(),
             $pool2->get(),
             $pool3->get()
@@ -77,17 +73,19 @@ describe('Autowired', function () {
 
     beforeEach(function () {
 
-        $this->signature = mock(SignatureInterface::class);
-
+        $this->callable = mock(CallableInterface::class);
+        $this->sequence = mock(ParameterSequenceInterface::class);
         $this->pool1 = mock(ArgumentPoolInterface::class);
         $this->pool2 = mock(ArgumentPoolInterface::class);
         $this->pool3 = mock(ArgumentPoolInterface::class);
 
-        $this->autowired = new Autowired($this->signature->get(), ...[
+        $this->autowired = new Autowired(
+            $this->callable->get(),
+            $this->sequence->get(),
             $this->pool1->get(),
             $this->pool2->get(),
-            $this->pool3->get(),
-        ]);
+            $this->pool3->get()
+        );
 
     });
 
@@ -103,7 +101,11 @@ describe('Autowired', function () {
 
             $this->bound = mock(CallableInterface::class);
 
-            $this->signature->bound->with($pool)->returns($this->bound);
+            $signature = mock(SignatureInterface::class);
+
+            $this->sequence->signature->with($this->callable)->returns($signature);
+
+            $signature->bound->with($pool)->returns($this->bound);
 
         });
 

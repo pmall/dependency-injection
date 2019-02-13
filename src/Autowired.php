@@ -7,22 +7,28 @@ use Quanta\PA\CallableInterface;
 use Quanta\PA\ConstructorAdapter;
 use Quanta\DI\Arguments\ArgumentPoolInterface;
 use Quanta\DI\Arguments\CompositeArgumentPool;
-use Quanta\DI\Signatures\Signature;
-use Quanta\DI\Signatures\SignatureInterface;
 use Quanta\DI\Signatures\CallableParameterSequence;
+use Quanta\DI\Signatures\ParameterSequenceInterface;
 use Quanta\DI\Signatures\ConstructorParameterSequence;
 
 final class Autowired
 {
     /**
-     * The callable signature.
+     * The callable to autowire.
      *
-     * @var \Quanta\DI\Signatures\SignatureInterface
+     * @var \Quanta\PA\CallableInterface
      */
-    private $signature;
+    private $callable;
 
     /**
-     * The pools providing arguments for the autowirable value.
+     * The sequence of parameters used to retrieve arguments from the pool.
+     *
+     * @var \Quanta\DI\Signatures\ParameterSequenceInterface
+     */
+    private $sequence;
+
+    /**
+     * The pools providing arguments for the parameters.
      *
      * @var \Quanta\DI\Arguments\ArgumentPoolInterface[]
      */
@@ -38,10 +44,8 @@ final class Autowired
     public static function fromCallable(callable $callable, ArgumentPoolInterface ...$pools): Autowired
     {
         return new Autowired(
-            new Signature(
-                new CallableAdapter($callable),
-                new CallableParameterSequence($callable)
-            ),
+            new CallableAdapter($callable),
+            new CallableParameterSequence($callable),
             ...$pools
         );
     }
@@ -56,10 +60,8 @@ final class Autowired
     public static function fromClass(string $class, ArgumentPoolInterface ...$pools): Autowired
     {
         return new Autowired(
-            new Signature(
-                new ConstructorAdapter($class),
-                new ConstructorParameterSequence($class)
-            ),
+            new ConstructorAdapter($class),
+            new ConstructorParameterSequence($class),
             ...$pools
         );
     }
@@ -67,12 +69,17 @@ final class Autowired
     /**
      * Constructor.
      *
-     * @param \Quanta\DI\Signatures\SignatureInterface      $signature
-     * @param \Quanta\DI\Arguments\ArgumentPoolInterface    ...$pools
+     * @param \Quanta\PA\CallableInterface                      $callable
+     * @param \Quanta\DI\Signatures\ParameterSequenceInterface  $sequence
+     * @param \Quanta\DI\Arguments\ArgumentPoolInterface        ...$pools
      */
-    public function __construct(SignatureInterface $signature, ArgumentPoolInterface ...$pools)
-    {
-        $this->signature = $signature;
+    public function __construct(
+        CallableInterface $callable,
+        ParameterSequenceInterface $sequence,
+        ArgumentPoolInterface ...$pools
+    ) {
+        $this->callable = $callable;
+        $this->sequence = $sequence;
         $this->pools = $pools;
     }
 
@@ -81,9 +88,9 @@ final class Autowired
      */
     public function __invoke(...$xs)
     {
-        $bound = $this->signature->bound(
-            new CompositeArgumentPool(...$this->pools)
-        );
+        $pool = new CompositeArgumentPool(...$this->pools);
+
+        $bound = $this->sequence->signature($this->callable)->bound($pool);
 
         if (count($xs) >= $bound->placeholders()->number()) {
             return $bound(...$xs);
