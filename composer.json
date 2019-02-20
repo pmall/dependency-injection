@@ -9,10 +9,10 @@
         "injection"
     ],
     "license": "MIT",
-    "homepage": "https://github.com/quanta/dependency-injection",
+    "homepage": "https://github.com/quantaphp/dependency-injection",
     "support": {
-        "issues": "https://github.com/quanta/dependency-injection/issues",
-        "source": "https://github.com/quanta/dependency-injection"
+        "issues": "https://github.com/quantaphp/dependency-injection/issues",
+        "source": "https://github.com/quantaphp/dependency-injection"
     },
     "authors": [
         {
