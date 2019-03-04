@@ -11,8 +11,6 @@ use Quanta\DI\Arguments\ArgumentPoolInterface;
 use Quanta\DI\Parameters\TypeHint;
 use Quanta\DI\Parameters\ParameterInterface;
 
-use Quanta\Exceptions\ArrayArgumentTypeErrorMessage;
-
 describe('ContainerEntries', function () {
 
     beforeEach(function () {
@@ -445,25 +443,19 @@ describe('ContainerEntries', function () {
 
                     it('should throw an InvalidArgumentException', function () {
 
-                        ArrayArgumentTypeErrorMessage::testing();
-
-                        $types = [
-                            SomeClass1::class => 'id4',
-                            SomeClass2::class => [],
-                            SomeClass3::class => 'id6',
-                        ];
-
-                        $test = function () use ($types) {
+                        $test = function () {
                             new ContainerEntries($this->container->get(), [
                                 'parameter1' => 'id1',
                                 'parameter2' => 'id2',
                                 'parameter3' => 'id3',
-                            ], $types);
+                            ], [
+                                SomeClass1::class => 'id4',
+                                SomeClass2::class => [],
+                                SomeClass3::class => 'id6',
+                            ]);
                         };
 
-                        expect($test)->toThrow(new InvalidArgumentException(
-                            (string) new ArrayArgumentTypeErrorMessage(3, 'string', $types)
-                        ));
+                        expect($test)->toThrow(new InvalidArgumentException);
 
                     });
 
@@ -477,21 +469,15 @@ describe('ContainerEntries', function () {
 
             it('should throw an InvalidArgumentException', function () {
 
-                ArrayArgumentTypeErrorMessage::testing();
-
-                $names = [
-                    'parameter1' => 'id1',
-                    'parameter2' => [],
-                    'parameter3' => 'id3',
-                ];
-
-                $test = function () use ($names) {
-                    new ContainerEntries($this->container->get(), $names);
+                $test = function () {
+                    new ContainerEntries($this->container->get(), [
+                        'parameter1' => 'id1',
+                        'parameter2' => [],
+                        'parameter3' => 'id3',
+                    ]);
                 };
 
-                expect($test)->toThrow(new InvalidArgumentException(
-                    (string) new ArrayArgumentTypeErrorMessage(2, 'string', $names)
-                ));
+                expect($test)->toThrow(new InvalidArgumentException);
 
             });
 

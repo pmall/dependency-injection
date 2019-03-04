@@ -6,9 +6,6 @@ use Psr\Container\ContainerInterface;
 
 use Quanta\DI\Parameters\ParameterInterface;
 
-use function Quanta\Exceptions\areAllTypedAs;
-use Quanta\Exceptions\ArrayArgumentTypeErrorMessage;
-
 final class ContainerEntries implements ArgumentPoolInterface
 {
     /**
@@ -42,15 +39,19 @@ final class ContainerEntries implements ArgumentPoolInterface
      */
     public function __construct(ContainerInterface $container, array $names = [], array $types = [])
     {
-        if (! areAllTypedAs('string', $names)) {
+        $result = \Quanta\ArrayTypeCheck::result($names, 'string');
+
+        if (! $result->isValid()) {
             throw new \InvalidArgumentException(
-                (string) new ArrayArgumentTypeErrorMessage(2, 'string', $names)
+                $result->message()->constructor($this, 2)
             );
         }
 
-        if (! areAllTypedAs('string', $types)) {
+        $result = \Quanta\ArrayTypeCheck::result($types, 'string');
+
+        if (! $result->isValid()) {
             throw new \InvalidArgumentException(
-                (string) new ArrayArgumentTypeErrorMessage(3, 'string', $types)
+                $result->message()->constructor($this, 3)
             );
         }
 

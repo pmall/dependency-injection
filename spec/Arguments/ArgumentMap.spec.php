@@ -9,8 +9,6 @@ use Quanta\DI\Arguments\ArgumentPoolInterface;
 use Quanta\DI\Parameters\TypeHint;
 use Quanta\DI\Parameters\ParameterInterface;
 
-use Quanta\Exceptions\ArrayArgumentTypeErrorMessage;
-
 describe('ArgumentMap', function () {
 
     context('when there is no type hint to instance map',function () {
@@ -212,25 +210,19 @@ describe('ArgumentMap', function () {
 
             it('should throw an InvalidArgumentException', function () {
 
-                ArrayArgumentTypeErrorMessage::testing();
-
-                $types = [
-                    SomeClass1::class => new class {},
-                    SomeClass2::class => 'instance2',
-                    SomeClass3::class => new class {},
-                ];
-
-                $test = function () use ($types) {
+                $test = function () {
                     new ArgumentMap([
                         'parameter1' => 'argument1',
                         'parameter2' => 'argument2',
                         'parameter3' => 'argument3',
-                    ], $types);
+                    ], [
+                        SomeClass1::class => new class {},
+                        SomeClass2::class => 'instance2',
+                        SomeClass3::class => new class {},
+                    ]);
                 };
 
-                expect($test)->toThrow(new InvalidArgumentException(
-                    (string) new ArrayArgumentTypeErrorMessage(2, 'object', $types)
-                ));
+                expect($test)->toThrow(new InvalidArgumentException);
 
             });
 

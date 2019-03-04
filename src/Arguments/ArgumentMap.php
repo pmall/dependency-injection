@@ -4,9 +4,6 @@ namespace Quanta\DI\Arguments;
 
 use Quanta\DI\Parameters\ParameterInterface;
 
-use function Quanta\Exceptions\areAllTypedAs;
-use Quanta\Exceptions\ArrayArgumentTypeErrorMessage;
-
 final class ArgumentMap implements ArgumentPoolInterface
 {
     /**
@@ -32,9 +29,11 @@ final class ArgumentMap implements ArgumentPoolInterface
      */
     public function __construct(array $names, array $types = [])
     {
-        if (! areAllTypedAs('object', $types)) {
+        $result = \Quanta\ArrayTypeCheck::result($types, 'object');
+
+        if (! $result->isValid()) {
             throw new \InvalidArgumentException(
-                (string) new ArrayArgumentTypeErrorMessage(2, 'object', $types)
+                $result->message()->constructor($this, 2)
             );
         }
 
